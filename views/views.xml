@@ -1,0 +1,60 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+<!--
+    <record model="ir.ui.view" id="fsm_industry_json_rpc.list">
+      <field name="name">fsm_industry_json_rpc list</field>
+      <field name="model">fsm_industry_json_rpc.fsm_industry_json_rpc</field>
+      <field name="arch" type="xml">
+        <list>
+          <field name="name"/>
+          <field name="value"/>
+          <field name="value2"/>
+        </list>
+      </field>
+    </record>
+-->
+
+    <!-- actions opening views on models -->
+<!--
+    <record model="ir.actions.act_window" id="fsm_industry_json_rpc.action_window">
+      <field name="name">fsm_industry_json_rpc window</field>
+      <field name="res_model">fsm_industry_json_rpc.fsm_industry_json_rpc</field>
+      <field name="view_mode">list,form</field>
+    </record>
+-->
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="fsm_industry_json_rpc.action_server">
+      <field name="name">fsm_industry_json_rpc server</field>
+      <field name="model_id" ref="model_fsm_industry_json_rpc_fsm_industry_json_rpc"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "list,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+<!--
+    <menuitem name="fsm_industry_json_rpc" id="fsm_industry_json_rpc.menu_root"/>
+-->
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="fsm_industry_json_rpc.menu_1" parent="fsm_industry_json_rpc.menu_root"/>
+    <menuitem name="Menu 2" id="fsm_industry_json_rpc.menu_2" parent="fsm_industry_json_rpc.menu_root"/>
+-->
+    <!-- actions -->
+<!--
+    <menuitem name="List" id="fsm_industry_json_rpc.menu_1_list" parent="fsm_industry_json_rpc.menu_1"
+              action="fsm_industry_json_rpc.action_window"/>
+    <menuitem name="Server to list" id="fsm_industry_json_rpc" parent="fsm_industry_json_rpc.menu_2"
+              action="fsm_industry_json_rpc.action_server"/>
+-->
+  </data>
+</odoo>

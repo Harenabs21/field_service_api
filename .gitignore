@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.so
+
+# Odoo
+*.zip
+*.swp
+*.swo
+*.log
+*.tmp
+*.db
+*.dat
+
+# Configuration
+*.vscode/
+*.idea/
+*.env
+.env
+.env.*
+
+# Egg/Build
+*.egg-info/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test coverage reports
+.coverage
+.tox/
+nosetests.xml
+htmlcov/
+
+# Editor files
+*.bak
+*.orig
+*.rej
+*~
+
+# Other
+*.iml
+*.sqlite3
+
+# Node/npm/yarn if present (rare in Odoo but just in case)
+node_modules/
+package-lock.json
+yarn.lock
