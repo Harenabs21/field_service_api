@@ -2,3 +2,4 @@
 
 from . import controllers
 from . import auth_controller
+from . import fsm_controller
