@@ -14,7 +14,7 @@ class FSMController(http.Controller):
     @token_required
     def get_field_service_tasks(self, **kwargs):
         """
-        Récupération des tâches Field Service
+        Retrieve specific user's interventions
         GET /api/interventions?status=<status>&priority=<priority>
         Headers: Authorization: Bearer <token>
         """
@@ -58,6 +58,41 @@ class FSMController(http.Controller):
             _logger.error("Erreur lors de la récupération des tâches: %s", e)
             return self._error_response('Erreur serveur', 500)
         
+    @http.route('/api/interventions/<int:task_id>', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
+    @token_required
+    def get_field_service_task(self, task_id, **kwargs):
+        """
+        Retrieve specific intervention owned by user by the task_id
+        GET /api/interventions/<taks_id>
+        Headers: Authorization: Bearer <token>
+        """    
+        try:
+            current_user = request.env.user
+            domain = [('user_ids', 'in', current_user.id), ('id', '=', task_id)]
+            task = request.env['project.task'].sudo().search(domain)
+            if not task.exists():
+                return self._error_response('Tâche non trouvée', 404)
+            task_data = {
+                    'id': task.id,
+                    'title': task.name,
+                    'dateStart': task.create_date.isoformat() if task.create_date else None,
+                    'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
+                    'status': task.stage_id.name if task.stage_id else '',
+                    'priority': self.map_priority(task.priority),
+                    'description': task.description or '',
+                    'client': task.partner_id.name if task.partner_id else '',
+                    'long': task.partner_id.partner_longitude,
+                    'lat': task.partner_id.partner_latitude,
+                    'telephone': task.partner_id.phone if task.partner_id else '',
+                    'address': re.sub(r'\s+', ' ', task.partner_id.contact_address or '').strip(),
+                    'distance': task.distance if hasattr(task, 'distance') else None,
+                }
+            return self._success_response("task retrieved successfully", task_data)
+
+        except Exception as e:
+            _logger.error("Error while retrieving the tasks datas: %s", e)
+            return self._error_response('Server error', 500)    
+        
     def map_priority(self, priority_value):
         """Mapping task priority"""
         return 'Haute' if priority_value == '1' else 'Normale'    
@@ -75,7 +110,7 @@ class FSMController(http.Controller):
             status=status,
             headers=[('Content-Type', 'application/json')]
         )
-    
+
     def _error_response(self, message, status=400):
         """Formate une réponse d'erreur"""
         response = {
