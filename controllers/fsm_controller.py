@@ -3,11 +3,7 @@ import datetime
 import json
 from odoo import http
 from odoo.http import request
-from auth_controller import token_required
-
-
-
-
+from .auth_controller import token_required
 
 _logger = logging.getLogger(__name__)
 
@@ -26,10 +22,10 @@ class FSMController(http.Controller):
             status = kwargs.get('status')  # Ex: 'todo'
 
             # Domaine : tâches FSM assignées à l'utilisateur connecté
-            domain = [('is_fsm', '=', True), ('user_id', '=', current_user.id)]
+            domain = [('is_fsm', '=', True), ('user_ids', 'in', current_user.id)]
 
             if status:
-                domain.append(('fsm_stage_id.name', '=', status))
+                domain.append(('stage_id.name', '=', status))
 
             Task = request.env['project.task'].sudo()
             tasks = Task.search(domain, order='date_deadline ASC')
@@ -39,9 +35,9 @@ class FSMController(http.Controller):
                 results.append({
                     'id': task.id,
                     'title': task.name,
-                    'dateStart': task.planned_date_begin.isoformat() if task.planned_date_begin else None,
-                    'dateEnd': task.planned_date_end.isoformat() if task.planned_date_end else None,
-                    'status': task.fsm_stage_id.name if task.fsm_stage_id else '',
+                    'dateStart': task.date_deadline.isoformat() if task.date_deadline else None,
+                    'dateEnd': task.date_end.isoformat() if task.date_end else None,
+                    'status': task.stage_id.name if task.stage_id else '',
                     'priority': task.priority,
                     'client': task.partner_id.name if task.partner_id else '',
                     'distance': task.distance if hasattr(task, 'distance') else None,
@@ -56,7 +52,6 @@ class FSMController(http.Controller):
             _logger.error("Erreur lors de la récupération des tâches: %s", e)
             return self._error_response('Erreur serveur', 500)
         
-
     def _success_response(self, data, status=200):
         """Formate une réponse de succès"""
         response = {
