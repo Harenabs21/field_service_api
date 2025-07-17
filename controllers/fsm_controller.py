@@ -15,7 +15,7 @@ class FSMController(http.Controller):
     def get_field_service_tasks(self, **kwargs):
         """
         Récupération des tâches Field Service
-        GET /api/field-service/tasks?limit=10&offset=0&status=todo
+        GET /api/field-service/tasks?status=<status>
         Headers: Authorization: Bearer <token>
         """
         try:
@@ -28,8 +28,8 @@ class FSMController(http.Controller):
             if status:
                 domain.append(('stage_id.name', '=', status))
 
-            Task = request.env['project.task'].sudo()
-            tasks = Task.search(domain, order='date_deadline ASC')
+            task_model = request.env['project.task'].sudo()
+            tasks = task_model.search(domain, order='date_deadline ASC')
 
             results = []
             for task in tasks:
@@ -39,7 +39,7 @@ class FSMController(http.Controller):
                     'dateStart': task.create_date.isoformat() if task.create_date else None,
                     'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
-                    'priority': task.priority,
+                    'priority': self.map_priority(task.priority),
                     'client': task.partner_id.name if task.partner_id else '',
                     'telephone': task.partner_id.phone if task.partner_id else '',
                     'address': re.sub(r'\s+', ' ', task.partner_id.contact_address or '').strip(),
@@ -54,6 +54,10 @@ class FSMController(http.Controller):
         except Exception as e:
             _logger.error("Erreur lors de la récupération des tâches: %s", e)
             return self._error_response('Erreur serveur', 500)
+        
+    def map_priority(self, priority_value):
+        """Mapping task priority"""
+        return 'Haute' if priority_value == '1' else 'Normale'    
         
     def _success_response(self, data, status=200):
         """Formate une réponse de succès"""
