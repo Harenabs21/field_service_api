@@ -15,17 +15,20 @@ class FSMController(http.Controller):
     def get_field_service_tasks(self, **kwargs):
         """
         Récupération des tâches Field Service
-        GET /api/interventions?status=<status>
+        GET /api/interventions?status=<status>&priority=<priority>
         Headers: Authorization: Bearer <token>
         """
         try:
             current_user = request.env.user
             status = kwargs.get('status') 
+            priority = kwargs.get('priority')
 
             domain = [('is_fsm', '=', True), ('user_ids', 'in', current_user.id)]
 
             if status:
                 domain.append(('stage_id.name', '=', status))
+            if priority:
+                domain.append(('priority', '=', priority))    
 
             task_model = request.env['project.task'].sudo()
             tasks = task_model.search(domain, order='date_deadline ASC')
