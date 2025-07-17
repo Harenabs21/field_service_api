@@ -8,10 +8,6 @@ from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
-# ===========================================
-# DÉCORATEUR POUR AUTHENTIFICATION PAR TOKEN
-# ===========================================
-
 
 def token_required(f):
     """Décorateur pour vérifier le token d'accès"""
@@ -27,11 +23,9 @@ def token_required(f):
             )
         
         try:
-            # Extraction du token (format: "Bearer <token>" ou juste "<token>")
             if token.startswith('Bearer '):
                 token = token.split(' ')[1]
             
-            # Recherche de l'utilisateur par token
             user = request.env['res.users'].sudo().search([
                 ('access_token', '=', token)
             ], limit=1)
@@ -43,7 +37,6 @@ def token_required(f):
                     headers=[('Content-Type', 'application/json')]
                 )
             
-            # Mise à jour du contexte utilisateur
             request.env.user = user
             
         except Exception as e:
@@ -58,10 +51,6 @@ def token_required(f):
     
     return decorated_function
 
-# ===========================================
-# CONTROLLER D'AUTHENTIFICATION
-# ===========================================
-
 
 class AuthController(http.Controller):
     """Controller pour les authentifications"""
@@ -74,7 +63,6 @@ class AuthController(http.Controller):
         Body: { "login": "admin", "password": "admin"}
         """
         try:
-            # Récupération des données JSON
             db = request.httprequest.headers.get('db')
             data = json.loads(request.httprequest.data.decode('utf-8'))
             login = data.get('login')
@@ -84,7 +72,6 @@ class AuthController(http.Controller):
             if not all([db, login, password]):
                 return self._error_response('db, login et password requis', 400)
             
-            # Authentification
             try:
                 request.session.authenticate(db, credentials)
                 uid = request.session.uid
@@ -95,7 +82,6 @@ class AuthController(http.Controller):
             if not uid:
                 return self._error_response('Identifiants incorrects', 401)
             
-            # Génération du token
             user = request.env['res.users'].sudo().browse(uid)
             token = user.generate_access_token()
             
@@ -148,10 +134,6 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Erreur lors de la vérification du token: %s", e)
             return self._error_response('Erreur serveur', 500)
-    
-    # ===========================================
-    # MÉTHODES UTILITAIRES
-    # ===========================================
     
     def _success_response(self, message, data, status=200):
         """Formate une réponse de succès"""

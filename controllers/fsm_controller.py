@@ -20,9 +20,8 @@ class FSMController(http.Controller):
         """
         try:
             current_user = request.env.user
-            status = kwargs.get('status')  # Ex: 'todo'
+            status = kwargs.get('status') 
 
-            # Domaine : tâches FSM assignées à l'utilisateur connecté
             domain = [('is_fsm', '=', True), ('user_ids', 'in', current_user.id)]
 
             if status:
@@ -40,6 +39,7 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': self.map_priority(task.priority),
+                    'description': task.description or '',
                     'client': task.partner_id.name if task.partner_id else '',
                     'telephone': task.partner_id.phone if task.partner_id else '',
                     'address': re.sub(r'\s+', ' ', task.partner_id.contact_address or '').strip(),
