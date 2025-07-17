@@ -10,14 +10,14 @@ _logger = logging.getLogger(__name__)
 
 
 def token_required(f):
-    """Décorateur pour vérifier le token d'accès"""
+    """Decorator to verify the access token"""
     @functools.wraps(f)
     def decorated_function(*args, **kwargs):
         token = request.httprequest.headers.get('Authorization')
         
         if not token:
             return request.make_response(
-                json.dumps({'success': False, 'error': 'Token manquant'}),
+                json.dumps({'success': False, 'error': 'missing token'}),
                 status=401,
                 headers=[('Content-Type', 'application/json')]
             )
@@ -32,7 +32,7 @@ def token_required(f):
             
             if not user or not user.validate_token(token):
                 return request.make_response(
-                    json.dumps({'success': False, 'error': 'Token invalide ou expiré'}),
+                    json.dumps({'success': False, 'error': 'Invalid token'}),
                     status=401,
                     headers=[('Content-Type', 'application/json')]
                 )
@@ -40,9 +40,9 @@ def token_required(f):
             request.env.user = user
             
         except Exception as e:
-            _logger.error("Erreur validation token: %s", e)
+            _logger.error("Error token validation: %s", e)
             return request.make_response(
-                json.dumps({'success': False, 'error': 'Erreur d\'authentification'}),
+                json.dumps({'success': False, 'error': 'Authentication error'}),
                 status=401,
                 headers=[('Content-Type', 'application/json')]
             )
@@ -53,11 +53,11 @@ def token_required(f):
 
 
 class AuthController(http.Controller):
-    """Controller pour les authentifications"""
+    """Authentication controller"""
     @http.route('/api/login', type='http', auth='public', methods=['POST'], csrf=False, cors='*')
     def api_login(self, **kwargs):
         """
-        Authentification utilisateur et génération de token
+        User authentication and token generation
         POST /api/login
         Headers: {'db' : db_name}
         Body: { "login": "admin", "password": "admin"}
@@ -70,17 +70,17 @@ class AuthController(http.Controller):
             credentials = {'login': login, 'password': password, 'type': 'password'}
 
             if not all([db, login, password]):
-                return self._error_response('db, login et password requis', 400)
+                return self._error_response('Credentials required', 400)
             
             try:
                 request.session.authenticate(db, credentials)
                 uid = request.session.uid
             except Exception as e:
-                _logger.error("Erreur authentification: %s", e)
-                return self._error_response('Erreur d\'authentification', 401)
+                _logger.error("Authentication error: %s", e)
+                return self._error_response('Authentication error', 401)
             
             if not uid:
-                return self._error_response('Identifiants incorrects', 401)
+                return self._error_response('Incorrect credentials', 401)
             
             user = request.env['res.users'].sudo().browse(uid)
             token = user.generate_access_token()
@@ -93,17 +93,17 @@ class AuthController(http.Controller):
                         })
             
         except json.JSONDecodeError:
-            return self._error_response('Format JSON invalide', 400)
+            return self._error_response('Invalid JSON format', 400)
         except Exception as e:
-            _logger.error("Erreur lors de l'authentification: %s", e)
-            return self._error_response('Erreur serveur', 500)
+            _logger.error("Authentication error: %s", e)
+            return self._error_response('Server error', 500)
     
     @http.route('/api/logout', type='http', auth='public', methods=['POST'],
                      csrf=False, cors='*')
     @token_required
     def api_logout(self, **kwargs):
         """
-        Déconnexion utilisateur
+        Loging out user
         POST /api/logout
         Headers: Authorization: Bearer <token>
         """
@@ -112,14 +112,14 @@ class AuthController(http.Controller):
             user.invalidate_token()
             return self._success_response("Log out successfully",{})
         except Exception as e:
-            _logger.error("Erreur lors de la déconnexion: %s", e)
-            return self._error_response('Erreur serveur', 500)
+            _logger.error("Error while logging out: %s", e)
+            return self._error_response('Server error', 500)
     
     @http.route('/api/token/verify', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
     @token_required
     def verify_token(self, **kwargs):
         """
-        Vérification de la validité du token
+        Token validation
         GET /api/token/verify
         Headers: Authorization: Bearer <token>
         """
@@ -132,11 +132,11 @@ class AuthController(http.Controller):
                 'token_expiry': user.token_expiry.isoformat() if user.token_expiry else None
             })
         except Exception as e:
-            _logger.error("Erreur lors de la vérification du token: %s", e)
-            return self._error_response('Erreur serveur', 500)
+            _logger.error("Error while verifying the token: %s", e)
+            return self._error_response('Server error', 500)
     
     def _success_response(self, message, data, status=200):
-        """Formate une réponse de succès"""
+        """Formats a success response"""
         response = {
             'success': True,
             'message': message,
@@ -150,7 +150,7 @@ class AuthController(http.Controller):
         )
     
     def _error_response(self, message, status=400):
-        """Formate une réponse d'erreur"""
+        """Formats an error response"""
         response = {
             'success': False,
             'error': message,

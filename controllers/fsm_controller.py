@@ -8,7 +8,9 @@ from .auth_controller import token_required
 
 _logger = logging.getLogger(__name__)
 
+
 class FSMController(http.Controller):
+    """Fiels service controller"""
 
     @http.route('/api/interventions', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
     @token_required
@@ -55,9 +57,9 @@ class FSMController(http.Controller):
                                           results)
 
         except Exception as e:
-            _logger.error("Erreur lors de la récupération des tâches: %s", e)
-            return self._error_response('Erreur serveur', 500)
-        
+            _logger.error("Error while retrieving task data: %s", e)
+            return self._error_response('Server error', 500)
+       
     @http.route('/api/interventions/<int:task_id>', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
     @token_required
     def get_field_service_task(self, task_id, **kwargs):
@@ -71,7 +73,7 @@ class FSMController(http.Controller):
             domain = [('user_ids', 'in', current_user.id), ('id', '=', task_id)]
             task = request.env['project.task'].sudo().search(domain)
             if not task.exists():
-                return self._error_response('Tâche non trouvée', 404)
+                return self._error_response('Intervention not found', 404)
             task_data = {
                     'id': task.id,
                     'title': task.name,
@@ -98,7 +100,7 @@ class FSMController(http.Controller):
         return 'Haute' if priority_value == '1' else 'Normale'    
         
     def _success_response(self, message, data, status=200):
-        """Formate une réponse de succès"""
+        """Formats a success response"""
         response = {
             'success': True,
             'message': message,
@@ -112,7 +114,7 @@ class FSMController(http.Controller):
         )
 
     def _error_response(self, message, status=400):
-        """Formate une réponse d'erreur"""
+        """Formats an error response"""
         response = {
             'success': False,
             'error': message,
