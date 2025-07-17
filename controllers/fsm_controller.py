@@ -1,6 +1,7 @@
 import logging
 import datetime
 import json
+import re
 from odoo import http
 from odoo.http import request
 from .auth_controller import token_required
@@ -35,12 +36,13 @@ class FSMController(http.Controller):
                 results.append({
                     'id': task.id,
                     'title': task.name,
-                    'dateStart': task.date_deadline.isoformat() if task.date_deadline else None,
-                    'dateEnd': task.date_end.isoformat() if task.date_end else None,
+                    'dateStart': task.create_date.isoformat() if task.create_date else None,
+                    'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': task.priority,
                     'client': task.partner_id.name if task.partner_id else '',
                     'telephone': task.partner_id.phone if task.partner_id else '',
+                    'address': re.sub(r'\s+', ' ', task.partner_id.contact_address or '').strip(),
                     'distance': task.distance if hasattr(task, 'distance') else None,
                 })
 
