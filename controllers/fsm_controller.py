@@ -40,6 +40,7 @@ class FSMController(http.Controller):
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': task.priority,
                     'client': task.partner_id.name if task.partner_id else '',
+                    'telephone': task.partner_id.phone if task.partner_id else '',
                     'distance': task.distance if hasattr(task, 'distance') else None,
                 })
 
