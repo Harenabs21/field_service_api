@@ -88,7 +88,6 @@ class AuthController(http.Controller):
             try:
                 request.session.authenticate(db, credentials)
                 uid = request.session.uid
-                print(uid)
             except Exception as e:
                 _logger.error("Erreur authentification: %s", e)
                 return self._error_response('Erreur d\'authentification', 401)
@@ -100,14 +99,12 @@ class AuthController(http.Controller):
             user = request.env['res.users'].sudo().browse(uid)
             token = user.generate_access_token()
             
-            return self._success_response({
-                'token': token,
-                'uid': uid,
-                'name': user.name,
-                'email': user.email,
-                'login': user.login,
-                'expires_in': 86400  # 24 heures en secondes
-            })
+            return self._success_response("Login successfully",
+                        {
+                            'user_id': uid,
+                            'email': user.email,
+                            'token': token
+                        })
             
         except json.JSONDecodeError:
             return self._error_response('Format JSON invalide', 400)
@@ -127,7 +124,7 @@ class AuthController(http.Controller):
         try:
             user = request.env.user
             user.invalidate_token()
-            return self._success_response({'message': 'Déconnecté avec succès'})
+            return self._success_response("Log out successfully",{})
         except Exception as e:
             _logger.error("Erreur lors de la déconnexion: %s", e)
             return self._error_response('Erreur serveur', 500)
@@ -142,12 +139,10 @@ class AuthController(http.Controller):
         """
         try:
             user = request.env.user
-            return self._success_response({
+            return self._success_response("Token verified successfully", {
                 'valid': True,
                 'user_id': user.id,
-                'name': user.name,
                 'email': user.email,
-                'login': user.login,
                 'token_expiry': user.token_expiry.isoformat() if user.token_expiry else None
             })
         except Exception as e:
@@ -158,10 +153,11 @@ class AuthController(http.Controller):
     # MÉTHODES UTILITAIRES
     # ===========================================
     
-    def _success_response(self, data, status=200):
+    def _success_response(self, message, data, status=200):
         """Formate une réponse de succès"""
         response = {
             'success': True,
+            'message': message,
             'data': data,
             'timestamp': datetime.now().isoformat()
         }

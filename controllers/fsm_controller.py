@@ -46,7 +46,7 @@ class FSMController(http.Controller):
                     'distance': task.distance if hasattr(task, 'distance') else None,
                 })
 
-            return self._success_response({
+            return self._success_response("Interventions data retrieved successfully", {
                 'tasks': results,
                 'total': len(results)
             })
@@ -59,10 +59,11 @@ class FSMController(http.Controller):
         """Mapping task priority"""
         return 'Haute' if priority_value == '1' else 'Normale'    
         
-    def _success_response(self, data, status=200):
+    def _success_response(self, message, data, status=200):
         """Formate une réponse de succès"""
         response = {
             'success': True,
+            'message': message,
             'data': data,
             'timestamp': datetime.datetime.now().isoformat()
         }
