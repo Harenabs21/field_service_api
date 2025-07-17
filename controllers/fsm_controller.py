@@ -10,12 +10,12 @@ _logger = logging.getLogger(__name__)
 
 class FSMController(http.Controller):
 
-    @http.route('/api/field-service/tasks', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
+    @http.route('/api/interventions', type='http', auth='public', methods=['GET'], csrf=False, cors='*')
     @token_required
     def get_field_service_tasks(self, **kwargs):
         """
         Récupération des tâches Field Service
-        GET /api/field-service/tasks?status=<status>
+        GET /api/interventions?status=<status>
         Headers: Authorization: Bearer <token>
         """
         try:
@@ -46,10 +46,8 @@ class FSMController(http.Controller):
                     'distance': task.distance if hasattr(task, 'distance') else None,
                 })
 
-            return self._success_response("Interventions data retrieved successfully", {
-                'tasks': results,
-                'total': len(results)
-            })
+            return self._success_response("Interventions data retrieved successfully",
+                                          results)
 
         except Exception as e:
             _logger.error("Erreur lors de la récupération des tâches: %s", e)
