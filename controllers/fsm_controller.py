@@ -134,8 +134,8 @@ class FSMController(http.Controller):
             task.write({'stage_id': stage.id})
             
             return self._success_response("Status updated successfully", {
-                'stage_id': stage.id,
-                'stage_name': stage.name
+                'status_id': stage.id,
+                'status_name': stage.name
             })
             
         except json.JSONDecodeError:
