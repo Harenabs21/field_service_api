@@ -96,6 +96,54 @@ class FSMController(http.Controller):
             _logger.error("Error while retrieving the tasks datas: %s", e)
             return self._error_response('Server error', 500)    
         
+    @http.route('/api/interventions/<int:task_id>/status', type='http', auth='public', methods=['PUT'], csrf=False, cors='*')
+    @token_required
+    def update_task_status(self, task_id, **kwargs):
+        """
+        Updating the status of a task
+        PUT /api/interventions/<task_id>/status
+        Headers: Authorization: Bearer <token>
+        """    
+        try:
+            data = json.loads(request.httprequest.data.decode('utf-8'))
+            stage_id = data.get('status_id')
+            stage_name = data.get('status_name')
+            
+            if not stage_id and not stage_name:
+                return self._error_response('stage_id or stage_name required', 400)
+            
+            task = request.env['project.task'].sudo().browse(task_id)
+            
+            if not task or not task.is_fsm:
+                return self._error_response('Task not found or not a FSM task', 404)
+            
+            if request.env.user not in task.user_ids:
+                return self._error_response('You can only edit your own tasks', 403)
+            
+            if stage_id:
+                stage = request.env['project.task.type'].sudo().browse(stage_id)
+            else:
+                stage = request.env['project.task.type'].sudo().search([
+                    ('name', '=', stage_name),
+                    ('project_ids', 'in', task.project_id.id)
+                ], limit=1)
+            
+            if not stage:
+                return self._error_response('Invalid stage', 400)
+            
+            task.write({'stage_id': stage.id})
+            
+            return self._success_response("Status updated successfully", {
+                'stage_id': stage.id,
+                'stage_name': stage.name
+            })
+            
+        except json.JSONDecodeError:
+            return self._error_response('JSON format invalid', 400)
+        except Exception as e:
+            _logger.error("Error while updating the status: %s", e)
+            return self._error_response('Server error', 500)
+        
     def map_priority(self, priority_value):
         """Mapping task priority"""
         return 'Haute' if priority_value == '1' else 'Normale'    
