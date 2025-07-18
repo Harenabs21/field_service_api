@@ -4,6 +4,7 @@ import json
 import re
 from odoo import http
 from odoo.http import request
+from odoo.tools import html2plaintext
 from .auth_controller import token_required
 
 _logger = logging.getLogger(__name__)
@@ -44,7 +45,7 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': self.map_priority(task.priority),
-                    'description': task.description or '',
+                    'description': html2plaintext(task.description or ''),
                     'client': task.partner_id.name if task.partner_id else '',
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
@@ -81,7 +82,7 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.isoformat() if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': self.map_priority(task.priority),
-                    'description': task.description or '',
+                    'description': html2plaintext(task.description or ''),
                     'client': task.partner_id.name if task.partner_id else '',
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
