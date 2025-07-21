@@ -6,10 +6,15 @@ info:
     This module exposes a REST API for interacting with Field Service tasks in
     Odoo, including authentication, intervention listing, updating status,
     and timesheet creation.
+tags:
+  - name: Authentication
+  - name: Interventions    
 paths:
   /api/login:
     post:
       summary: User login
+      tags:
+        - Authentication
       description: Authenticate user and retrieve an access token.
       requestBody:
         required: true
@@ -37,6 +42,8 @@ paths:
 
   /api/logout:
     post:
+      tags:
+        - Authentication
       summary: User logout
       security:
         - bearerAuth: []
@@ -49,6 +56,8 @@ paths:
 
   /api/token/verify:
     get:
+      tags:
+        - Authentication
       summary: Verify token
       security:
         - bearerAuth: []
@@ -61,6 +70,8 @@ paths:
 
   /api/interventions:
     get:
+      tags:
+        - Interventions
       summary: List interventions
       security:
         - bearerAuth: []
@@ -98,6 +109,8 @@ paths:
 
   /api/interventions/{task_id}:
     get:
+      tags:
+        - Interventions
       summary: Get intervention details
       security:
         - bearerAuth: []
@@ -126,6 +139,8 @@ paths:
 
   /api/interventions/{task_id}/status:
     put:
+      tags:
+        - Interventions
       summary: Update intervention status
       security:
         - bearerAuth: []
@@ -158,6 +173,8 @@ paths:
 
   /api/interventions/{task_id}/timesheet:
     post:
+      tags:
+        - Interventions
       summary: Create timesheet
       security:
         - bearerAuth: []
