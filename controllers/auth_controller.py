@@ -121,6 +121,36 @@ class AuthController(http.Controller):
             return self._error_response(
                 'Server error', 500
             )
+        
+    @http.route(
+            '/api/reset-password', type='http', auth='public',
+            methods=['POST'], csrf=False
+    )
+    def reset_password(self, **kwargs):
+        """
+        Send an email to reset password
+        """   
+        data = json.loads(
+                request.httprequest.data.decode('utf-8')
+            )
+        login = data.get("email")
+        if not login:
+            return self._error_response("Email required")
+        user = request.env['res.users'].sudo().search(
+            [('login', '=', login)], limit=1
+            )
+        if not user:
+            return self._error_response("User not found", 404)
+        try:
+            user.action_reset_password()
+            return self._success_response(
+                "Password reset link sent successfully", {}
+                )
+        except Exception as e:
+            _logger.error("Server error %s", e)
+            return self._error_response(
+                "Failed to send reset password of email", 500
+                )
 
     @http.route(
         '/api/logout', type='http', auth='public',
