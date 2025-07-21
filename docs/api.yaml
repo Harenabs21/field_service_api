@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Field Service API
+  version: 1.0.0
+  description: >-
+    This module exposes a REST API for interacting with Field Service tasks in
+    Odoo, including authentication, intervention listing, updating status,
+    and timesheet creation.
+paths:
+  /api/login:
+    post:
+      summary: User login
+      description: Authenticate user and retrieve an access token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+              required:
+                - login
+                - password
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              example:
+                token: "eyJ0eXAiOiJKV..."
+        '401':
+          description: Invalid credentials
+
+  /api/logout:
+    post:
+      summary: User logout
+      security:
+        - bearerAuth: []
+      description: Invalidate the current access token.
+      responses:
+        '200':
+          description: Logout successful
+        '401':
+          description: Unauthorized
+
+  /api/token/verify:
+    get:
+      summary: Verify token
+      security:
+        - bearerAuth: []
+      description: Verify the validity of the current token.
+      responses:
+        '200':
+          description: Token is valid
+        '401':
+          description: Invalid or expired token
+
+  /api/interventions:
+    get:
+      summary: List interventions
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of interventions
+          content:
+            application/json:
+              example:
+                - id: 1
+                  title: "Plumbing maintenance"
+                  dateStart: "2025-07-01"
+                  dateEnd: "2025-07-01"
+                  status: "Scheduled"
+                  priority: "High"
+                  client: "John Doe"
+                  distance: 10.5
+                - id: 2
+                  title: "AC repair"
+                  dateStart: "2025-07-02"
+                  dateEnd: "2025-07-02"
+                  status: "In Progress"
+                  priority: "Medium"
+                  client: "Jane Smith"
+                  distance: 5.0
+
+  /api/interventions/{task_id}:
+    get:
+      summary: Get intervention details
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              example:
+                id: 1
+                title: "Plumbing maintenance"
+                dateStart: "2025-07-01"
+                dateEnd: "2025-07-01"
+                status: "Scheduled"
+                priority: "High"
+                client: "John Doe"
+                distance: 10.5
+        '404':
+          description: Task not found
+
+  /api/interventions/{task_id}/status:
+    put:
+      summary: Update intervention status
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status_id:
+                  type: integer
+                status_name:
+                  type: string
+      responses:
+        '200':
+          description: Status updated
+        '400':
+          description: Invalid input
+        '403':
+          description: Forbidden
+        '404':
+          description: Task not found
+
+  /api/interventions/{task_id}/timesheet:
+    post:
+      summary: Create timesheet
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                unit_amount:
+                  type: number
+                date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Timesheet created
+          content:
+            application/json:
+              example:
+                message: "Timesheet entry created."
+                task_id: 1
+                unit_amount: 2.0
+                date: "2025-07-21"
+        '400':
+          description: Invalid data
+        '403':
+          description: Forbidden
+        '404':
+          description: Task not found
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
