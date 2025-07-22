@@ -6,6 +6,7 @@ from datetime import datetime
 from odoo import http
 from odoo.http import request
 from odoo.tools import html2plaintext
+from pytz import UTC
 from .auth_controller import token_required
 from .utils.api_response import ApiResponse
 
@@ -53,9 +54,11 @@ class FSMController(http.Controller):
                 results.append({
                     'id': task.id,
                     'title': task.name,
-                    'dateStart': task.date_assign.isoformat()
+                    'dateStart': task.date_assign.replace(
+                        tzinfo=UTC).isoformat()
                     if task.date_assign else None,
-                    'dateEnd': task.date_deadline.isoformat()
+                    'dateEnd': task.date_deadline.replace(
+                        tzinfo=UTC).isoformat()
                     if task.date_deadline else None,
                     'status': task.stage_id.name if task.stage_id else '',
                     'priority': self._map_priority(task.priority),
@@ -117,9 +120,9 @@ class FSMController(http.Controller):
             task_data = {
                 'id': task.id,
                 'title': task.name,
-                'dateStart': task.date_assign.isoformat()
+                'dateStart': task.date_assign.replace(tzinfo=UTC).isoformat()
                 if task.date_assign else None,
-                'dateEnd': task.date_deadline.isoformat()
+                'dateEnd': task.date_deadline.replace(tzinfo=UTC).isoformat()
                 if task.date_deadline else None,
                 'status': task.stage_id.name if task.stage_id else '',
                 'priority': self._map_priority(task.priority),
@@ -272,7 +275,7 @@ class FSMController(http.Controller):
             timesheet_response = {
                 'id': timesheet.id,
                 'description': timesheet.name,
-                'date': timesheet.date.isoformat(),
+                'date': timesheet.date.replace(tzinfo=UTC).isoformat(),
                 'time_allocated': timesheet.unit_amount
             }
 
