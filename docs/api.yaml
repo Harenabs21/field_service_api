@@ -40,6 +40,29 @@ paths:
         '401':
           description: Invalid credentials
 
+  /api/auth/reset-password:
+    post:
+      summary: Reset password
+      tags:
+        - Authentication
+      description: Reset password using the email of an user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+      responses:
+        '200':
+          description: Success
+        '404':
+          description: User not found        
+
   /api/auth/logout:
     post:
       tags:
