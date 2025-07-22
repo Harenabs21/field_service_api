@@ -148,7 +148,7 @@ class FSMController(http.Controller):
             return ApiResponse.error_response('Server error', 500)
 
     @http.route(
-        '/api/interventions/<int:task_id>/status',
+        '/api/interventions/<int:task_id>/update-status',
         type='http',
         auth='public',
         methods=['PUT'],
@@ -159,7 +159,7 @@ class FSMController(http.Controller):
     def update_task_status(self, task_id):
         """
         Update task status
-        PUT /api/interventions/<task_id>/status
+        PUT /api/interventions/<task_id>/update-status
         Headers: Authorization: Bearer <token>
         """
         try:
@@ -214,7 +214,7 @@ class FSMController(http.Controller):
             return ApiResponse.error_response('Server error', 500)
 
     @http.route(
-        '/api/interventions/<int:task_id>/timesheet',
+        '/api/interventions/<int:task_id>/create-timesheet',
         type='http',
         auth='public',
         methods=['POST'],
@@ -225,7 +225,7 @@ class FSMController(http.Controller):
     def create_timesheet(self, task_id):
         """
         Create a timesheet entry
-        POST /api/interventions/<task_id>/timesheet
+        POST /api/interventions/<task_id>/create-timesheet
         Headers: Authorization: Bearer <token>
         Body: {
             "description": "Work done",
