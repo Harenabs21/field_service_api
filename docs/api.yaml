@@ -10,7 +10,7 @@ tags:
   - name: Authentication
   - name: Interventions    
 paths:
-  /api/login:
+  /api/auth/login:
     post:
       summary: User login
       tags:
@@ -40,7 +40,7 @@ paths:
         '401':
           description: Invalid credentials
 
-  /api/logout:
+  /api/auth/logout:
     post:
       tags:
         - Authentication
@@ -54,7 +54,7 @@ paths:
         '401':
           description: Unauthorized
 
-  /api/token/verify:
+  /api/auth/verify-token:
     get:
       tags:
         - Authentication
@@ -68,7 +68,7 @@ paths:
         '401':
           description: Invalid or expired token
 
-  /api/interventions:
+  /api/interventions/list:
     get:
       tags:
         - Interventions
@@ -137,7 +137,7 @@ paths:
         '404':
           description: Task not found
 
-  /api/interventions/{task_id}/status:
+  /api/interventions/{task_id}/update-status:
     put:
       tags:
         - Interventions
@@ -171,7 +171,7 @@ paths:
         '404':
           description: Task not found
 
-  /api/interventions/{task_id}/timesheet:
+  /api/interventions/{task_id}/create-timesheet:
     post:
       tags:
         - Interventions
