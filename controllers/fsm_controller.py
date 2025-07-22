@@ -221,7 +221,7 @@ class FSMController(http.Controller):
         csrf=False,
         cors='*'
     )
-    @token_required
+    @token_required 
     def create_timesheet(self, task_id):
         """
         Create a timesheet entry
@@ -233,64 +233,64 @@ class FSMController(http.Controller):
             "date": "2024-01-15"
         }
         """
+        response = None
         try:
             data = json.loads(request.httprequest.data.decode('utf-8'))
 
             task = request.env['project.task'].sudo().browse(task_id)
 
             if not task.exists() or not task.is_fsm:
-                return ApiResponse.error_response('FSM task not found', 404)
-
-            if request.env.user not in task.user_ids:
-                return ApiResponse.error_response(
+                response = ApiResponse.error_response(
+                    'FSM task not found', 404)
+            elif request.env.user not in task.user_ids:
+                response = ApiResponse.error_response(
                     'You can only create timesheets for your own tasks', 403
                 )
+            else:
+                date_str = data.get('date')
+                try:
+                    date = (
+                        datetime.strptime(date_str, "%Y-%m-%d").date()
+                        if date_str else datetime.now().date()
+                    )
 
-            date_str = data.get('date')
-            try:
-                date = (
-                    datetime.strptime(date_str, "%Y-%m-%d").date()
-                    if date_str else datetime.now().date()
-                )
-            except ValueError:
-                return ApiResponse.error_response(
-                    'Invalid date format. Use YYYY-MM-DD.', 400
-                )
+                    timesheet_data = {
+                        'task_id': task_id,
+                        'project_id': (
+                            task.project_id.id if task.project_id else None
+                        ),
+                        'name': data.get('description', ''),
+                        'unit_amount': float(data.get('time_allocated', 0)),
+                        'date': date,
+                        'user_id': request.env.user.id
+                    }
 
-            timesheet_data = {
-                'task_id': task_id,
-                'project_id': (
-                    task.project_id.id if task.project_id else None
-                ),
-                'name': data.get('description', ''),
-                'unit_amount': float(data.get('time_allocated', 0)),
-                'date': date,
-                'user_id': request.env.user.id
-            }
+                    timesheet = request.env['account.analytic.line'].sudo().create(
+                        timesheet_data
+                    )
 
-            timesheet = request.env['account.analytic.line'].sudo().create(
-                timesheet_data
-            )
+                    timesheet_response = {
+                        'id': timesheet.id,
+                        'description': timesheet.name,
+                        'date': timesheet.date.replace(tzinfo=UTC).isoformat(),
+                        'time_allocated': timesheet.unit_amount
+                    }
 
-            timesheet_response = {
-                'id': timesheet.id,
-                'description': timesheet.name,
-                'date': timesheet.date.replace(tzinfo=UTC).isoformat(),
-                'time_allocated': timesheet.unit_amount
-            }
-
-            return ApiResponse.success_response(
-                "Timesheet created successfully",
-                timesheet_response
-                )
-
+                    response = ApiResponse.success_response(
+                        "Timesheet created successfully",
+                        timesheet_response
+                    )
+                except ValueError:
+                    response = ApiResponse.error_response(
+                        'Invalid date format. Use YYYY-MM-DD.', 400
+                    )
         except json.JSONDecodeError:
-            return ApiResponse.error_response('Invalid JSON format', 400)
-        except ValueError as e:
-            return ApiResponse.error_response(f'Invalid data: {str(e)}', 400)
+            response = ApiResponse.error_response('Invalid JSON format', 400)
         except Exception as e:
             _logger.error("Error while creating timesheet: %s", e)
-            return ApiResponse.error_response('Server error', 500)
+            response = ApiResponse.error_response('Server error', 500)
+
+        return response
 
     def _map_priority(self, priority_value):
         """Map task priority"""
