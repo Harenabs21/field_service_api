@@ -51,6 +51,19 @@ class FSMController(http.Controller):
 
             results = []
             for task in tasks:
+                sale_order_lines = request.env[
+                    'sale.order.line'].sudo().search([
+                        ('task_id', '=', task.id)])
+
+                material_lines = []
+
+                for line in sale_order_lines:
+                    material_lines.append({
+                        'material_id': line.product_id.id,
+                        'name': line.product_id.name,
+                        'quantity': line.product_uom_qty
+                    })
+
                 results.append({
                     'id': task.id,
                     'title': task.name,
@@ -74,6 +87,7 @@ class FSMController(http.Controller):
                     ).strip(),
                     'distance': task.distance
                     if hasattr(task, 'distance') else None,
+                    'materials': material_lines
                 })
 
             return ApiResponse.success_response(
@@ -117,6 +131,18 @@ class FSMController(http.Controller):
                     'You can only view your own task', 403
                     )
 
+            sale_order_lines = request.env['sale.order.line'].sudo().search([
+                ('task_id', '=', task.id)
+            ])
+
+            material_lines = []
+            for line in sale_order_lines:
+                material_lines.append({
+                    'material_id': line.product_id.id,
+                    'name': line.product_id.name,
+                    'quantity': line.product_uom_qty
+                })
+
             task_data = {
                 'id': task.id,
                 'title': task.name,
@@ -137,6 +163,7 @@ class FSMController(http.Controller):
                 ).strip(),
                 'distance': task.distance
                 if hasattr(task, 'distance') else None,
+                'materials': material_lines
             }
 
             return ApiResponse.success_response(
@@ -221,7 +248,7 @@ class FSMController(http.Controller):
         csrf=False,
         cors='*'
     )
-    @token_required 
+    @token_required
     def create_timesheet(self, task_id):
         """
         Create a timesheet entry
@@ -265,8 +292,9 @@ class FSMController(http.Controller):
                         'user_id': request.env.user.id
                     }
 
-                    timesheet = request.env['account.analytic.line'].sudo().create(
-                        timesheet_data
+                    timesheet = request.env[
+                        'account.analytic.line'].sudo().create(
+                            timesheet_data
                     )
 
                     timesheet_response = {
