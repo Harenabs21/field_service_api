@@ -133,6 +133,13 @@ paths:
                   lat: 0.0
                   telephone: "123-456-7890"
                   address: "123 Main St, City, Country"
+                  materials:
+                  - material_id: 1
+                    name: "Pipe"
+                    quantity: 5
+                  - material_id: 2
+                    name: "Faucet"
+                    quantity: 2
                 - id: 2
                   title: "AC repair"
                   dateStart: "2025-07-02"
@@ -146,6 +153,13 @@ paths:
                   lat: 0.0
                   telephone: "123-456-7890"
                   address: "123 Main St, City, Country"
+                  materials:
+                  - material_id: 1
+                    name: "Pipe"
+                    quantity: 5
+                  - material_id: 2
+                    name: "Faucet"
+                    quantity: 2
 
   /api/interventions/{task_id}:
     get:
@@ -179,6 +193,13 @@ paths:
                 lat: 0.0
                 telephone: "123-456-7890"
                 address: "123 Main St, City, Country"
+                materials:
+                  - material_id: 1
+                    name: "Pipe"
+                    quantity: 5
+                  - material_id: 2
+                    name: "Faucet"
+                    quantity: 2
         '404':
           description: Task not found
 
