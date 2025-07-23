@@ -128,6 +128,11 @@ paths:
                   priority: "High"
                   client: "John Doe"
                   distance: 10.5
+                  description: "Routine maintenance for plumbing system."
+                  long: 0.0
+                  lat: 0.0
+                  telephone: "123-456-7890"
+                  address: "123 Main St, City, Country"
                 - id: 2
                   title: "AC repair"
                   dateStart: "2025-07-02"
@@ -136,6 +141,11 @@ paths:
                   priority: "Medium"
                   client: "Jane Smith"
                   distance: 5.0
+                  description: "Routine maintenance for plumbing system."
+                  long: 0.0
+                  lat: 0.0
+                  telephone: "123-456-7890"
+                  address: "123 Main St, City, Country"
 
   /api/interventions/{task_id}:
     get:
@@ -164,6 +174,11 @@ paths:
                 priority: "High"
                 client: "John Doe"
                 distance: 10.5
+                description: "Routine maintenance for plumbing system."
+                long: 0.0
+                lat: 0.0
+                telephone: "123-456-7890"
+                address: "123 Main St, City, Country"
         '404':
           description: Task not found
 
