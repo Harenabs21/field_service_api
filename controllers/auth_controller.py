@@ -52,11 +52,14 @@ class AuthController(http.Controller):
         """
         User authentication and token generation
         POST /api/auth/login
-        Headers: {'db': db_name}
         Body: {"login": "admin", "password": "admin"}
         """
         try:
-            db = request.httprequest.headers.get('db')
+            db = request.session.db
+            if not db:
+                return ApiResponse.error_response(
+                    'Database not specified', 400
+                )
             data = json.loads(
                 request.httprequest.data.decode('utf-8')
             )
@@ -143,7 +146,7 @@ class AuthController(http.Controller):
     def reset_password(self):
         """
         Send an email to reset password
-        """   
+        """  
         data = json.loads(
                 request.httprequest.data.decode('utf-8')
             )
