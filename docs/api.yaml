@@ -16,6 +16,13 @@ paths:
       tags:
         - Authentication
       description: Authenticate user and retrieve an access token.
+      parameters:
+        - in: header
+          name: db
+          description: database name
+          schema:
+            type: string
+          required: true  
       requestBody:
         required: true
         content:
