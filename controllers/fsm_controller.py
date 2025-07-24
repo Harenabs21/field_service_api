@@ -323,7 +323,7 @@ class FSMController(http.Controller):
         return response
 
     @http.route(
-        '/api/interventions/<int:task_id>/sync',
+        '/api/interventions/sync',
         type='http',
         auth='public',
         methods=['POST'],
@@ -331,34 +331,39 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
-    def sync_intervention_data(self, task_id):
+    def sync_intervention_data(self):
         """
         Synchronize offline intervention data
         - Create timesheet
-        - Update task status to 'Terminé'
-        Body: {
-            "timesheets": [...],
-            "status": "Terminé"
-        }
+        - Update task status
+        - Upload files
         """
         try:
             data = json.loads(request.httprequest.data.decode('utf-8'))
-            task = request.env['project.task'].sudo().browse(task_id)
+            tasks_data = data.get('tasks', [])
+            if not tasks_data:
+                return ApiResponse.error_response("No tasks provided", 400)
 
-            if not task.exists() or not task.is_fsm:
-                return ApiResponse.error_response('FSM task not found', 404)
+            for task_data in tasks_data:
+                task_id = task_data.get('task_id')
+                values = task_data.get('values', {})
 
-            if request.env.user not in task.user_ids:
-                return ApiResponse.error_response(
-                    'You can only sync your own tasks', 403)
+                task = request.env['project.task'].sudo().browse(task_id)
+                if not task.exists() or not task.is_fsm:
+                    continue
 
-            timesheets = data.get('timesheets', [])
-            self._create_timesheets(task, timesheets)
+                if request.env.user not in task.user_ids:
+                    continue
 
-            new_status = data.get('status', 'Terminé')
-            self._update_task_status(task, new_status)
-            attachment_files = data.get('attachment_files', [])
-            self._upload_files(task, attachment_files)
+                timesheets = values.get('timesheets', [])
+                self._create_timesheets(task, timesheets)
+
+                new_status = values.get('status')
+                if new_status:
+                    self._update_task_status(task, new_status)
+
+                attachment_files = values.get('attachment_files', [])
+                self._upload_files(task, attachment_files)
 
             return ApiResponse.success_response(
                 "Intervention synchronized successfully", {})
