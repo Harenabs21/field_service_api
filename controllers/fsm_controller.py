@@ -1,5 +1,7 @@
+import base64
 import json
 import logging
+import mimetypes
 import re
 
 from datetime import datetime
@@ -355,6 +357,8 @@ class FSMController(http.Controller):
 
             new_status = data.get('status', 'Terminé')
             self._update_task_status(task, new_status)
+            attachment_files = data.get('attachment_files', [])
+            self._upload_files(task, attachment_files)
 
             return ApiResponse.success_response(
                 "Intervention synchronized successfully", {})
@@ -395,3 +399,33 @@ class FSMController(http.Controller):
 
         if stage:
             task.write({'stage_id': stage.id})
+
+    def _upload_files(self, task, attachment_files):
+        """
+        Saves base64 encoded files as task-related attachments
+        """
+        for file in attachment_files:
+            try:
+                filename = file.get('filename')
+                encoded_data = file.get('data')
+                if not filename or not encoded_data:
+                    continue
+
+                decoded = base64.b64decode(encoded_data)
+                request.env['ir.attachment'].sudo().create({
+                    'name': filename,
+                    'datas': base64.b64encode(decoded),
+                    'res_model': 'project.task',
+                    'res_id': task.id,
+                    'mimetype': self._get_mimetype(filename),
+                    'type': 'binary'
+                })
+            except Exception as e:
+                _logger.warning("File ignored : %s", e)
+
+    def _get_mimetype(self, filename):
+        """
+        Dynamically guess the mimetype from the filename
+        """
+        mimetype, _ = mimetypes.guess_type(filename)
+        return mimetype or 'application/octet-stream'
