@@ -320,6 +320,78 @@ class FSMController(http.Controller):
 
         return response
 
+    @http.route(
+        '/api/interventions/<int:task_id>/sync',
+        type='http',
+        auth='public',
+        methods=['POST'],
+        csrf=False,
+        cors='*'
+    )
+    @token_required
+    def sync_intervention_data(self, task_id):
+        """
+        Synchronize offline intervention data
+        - Create timesheet
+        - Update task status to 'Terminé'
+        Body: {
+            "timesheets": [...],
+            "status": "Terminé"
+        }
+        """
+        try:
+            data = json.loads(request.httprequest.data.decode('utf-8'))
+            task = request.env['project.task'].sudo().browse(task_id)
+
+            if not task.exists() or not task.is_fsm:
+                return ApiResponse.error_response('FSM task not found', 404)
+
+            if request.env.user not in task.user_ids:
+                return ApiResponse.error_response(
+                    'You can only sync your own tasks', 403)
+
+            timesheets = data.get('timesheets', [])
+            self._create_timesheets(task, timesheets)
+
+            new_status = data.get('status', 'Terminé')
+            self._update_task_status(task, new_status)
+
+            return ApiResponse.success_response(
+                "Intervention synchronized successfully", {})
+
+        except json.JSONDecodeError:
+            return ApiResponse.error_response('Invalid JSON format', 400)
+        except Exception as e:
+            _logger.error("Error in sync: %s", e)
+            return ApiResponse.error_response('Server error', 500)
+
     def _map_priority(self, priority_value):
         """Map task priority"""
         return 'Haute' if priority_value == '1' else 'Normale'
+
+    def _create_timesheets(self, task, timesheet_entries):
+        """Creates multiple timesheets for a task"""
+        for entry in timesheet_entries:
+            try:
+                date = datetime.strptime(entry.get('date'), "%Y-%m-%d").date()
+            except (ValueError, TypeError):
+                date = datetime.now().date()
+
+            request.env['account.analytic.line'].sudo().create({
+                'task_id': task.id,
+                'project_id': task.project_id.id if task.project_id else None,
+                'name': entry.get('description', ''),
+                'unit_amount': float(entry.get('time_allocated', 0)),
+                'date': date,
+                'user_id': request.env.user.id
+            })
+
+    def _update_task_status(self, task, status_name):
+        """Updates the task's status to the given stage name"""
+        stage = request.env['project.task.type'].sudo().search([
+            ('name', '=', status_name),
+            ('project_ids', 'in', task.project_id.id)
+        ], limit=1)
+
+        if stage:
+            task.write({'stage_id': stage.id})
