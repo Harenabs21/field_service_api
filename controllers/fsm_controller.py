@@ -357,12 +357,7 @@ class FSMController(http.Controller):
                     return ApiResponse.error_response(
                         "You can only sync your own tasks", 403)
 
-                timesheets = values.get('timesheets', [])
-                self._create_timesheets(task, timesheets)
-
-                new_status = values.get('status')
-                if new_status:
-                    self._update_task_status(task, new_status)
+                self._update_task_data(task, values)
 
                 attachment_files = values.get('attachment_files', [])
                 self._upload_files(task, attachment_files)
@@ -383,15 +378,31 @@ class FSMController(http.Controller):
         """Map task priority"""
         return 'Haute' if priority_value == '1' else 'Normale'
 
-    def _create_timesheets(self, task, timesheet_entries):
-        """Creates multiple timesheets for a task"""
+    def _update_task_data(self, task, values):
+        """
+        Updates status and adds timesheets
+        """
+        updates = {}
+
+        new_status = values.get('status')
+        if new_status:
+            stage = request.env['project.task.type'].sudo().search([
+                ('name', '=', new_status),
+                ('project_ids', 'in', task.project_id.id)
+            ], limit=1)
+            if stage:
+                updates['stage_id'] = stage.id
+
+        timesheet_entries = values.get('timesheets', [])
+        new_timesheet_ids = []
+
         for entry in timesheet_entries:
             try:
                 date = datetime.strptime(entry.get('date'), "%Y-%m-%d").date()
             except (ValueError, TypeError):
                 date = datetime.now().date()
 
-            request.env['account.analytic.line'].sudo().create({
+            timesheet = request.env['account.analytic.line'].sudo().create({
                 'task_id': task.id,
                 'project_id': task.project_id.id if task.project_id else None,
                 'name': entry.get('description', ''),
@@ -399,16 +410,13 @@ class FSMController(http.Controller):
                 'date': date,
                 'user_id': request.env.user.id
             })
+            new_timesheet_ids.append(timesheet.id)
 
-    def _update_task_status(self, task, status_name):
-        """Updates the task's status to the given stage name"""
-        stage = request.env['project.task.type'].sudo().search([
-            ('name', '=', status_name),
-            ('project_ids', 'in', task.project_id.id)
-        ], limit=1)
+        if new_timesheet_ids:
+            updates['timesheet_ids'] = [(4, tid) for tid in new_timesheet_ids]
 
-        if stage:
-            task.write({'stage_id': stage.id})
+        if updates:
+            task.sudo().write(updates)
 
     def _upload_files(self, task, attachment_files):
         """
