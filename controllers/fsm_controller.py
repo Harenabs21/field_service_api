@@ -350,10 +350,12 @@ class FSMController(http.Controller):
 
                 task = request.env['project.task'].sudo().browse(task_id)
                 if not task.exists() or not task.is_fsm:
-                    continue
+                    return ApiResponse.error_response(
+                        "Task not found or not a FSM task", 404)
 
                 if request.env.user not in task.user_ids:
-                    continue
+                    return ApiResponse.error_response(
+                        "You can only sync your own tasks", 403)
 
                 timesheets = values.get('timesheets', [])
                 self._create_timesheets(task, timesheets)
@@ -364,6 +366,9 @@ class FSMController(http.Controller):
 
                 attachment_files = values.get('attachment_files', [])
                 self._upload_files(task, attachment_files)
+
+                comments = values.get('comments', [])
+                self._post_comments(task, comments)
 
             return ApiResponse.success_response(
                 "Intervention synchronized successfully", {})
@@ -429,6 +434,37 @@ class FSMController(http.Controller):
                 attachment_ids.append(attachment.id)
             except Exception as e:
                 _logger.warning("File ignored : %s", e)
+        return attachment_ids
+
+    def _post_comments(self, task, comments):
+        """
+        Posts comments to the task
+        """
+        for comment in comments:
+            try:
+                message_body = comment.get('message')
+                attachment_files = comment.get('attachment_files', [])
+
+                if not message_body:
+                    continue
+
+                attachment_ids = self._upload_files(task, attachment_files)
+
+                note_subtype = request.env.ref('mail.mt_note')
+
+                request.env['mail.message'].sudo().create({
+                    'body': message_body,
+                    'model': 'project.task',
+                    'res_id': task.id,
+                    'message_type': 'comment',
+                    'subtype_id': note_subtype.id if note_subtype else None,
+                    'author_id': request.env.user.partner_id.id,
+                    'attachment_ids': [(6, 0, attachment_ids)] if
+                    attachment_ids else False,
+                })
+
+            except Exception as e:
+                _logger.warning("Manual comment creation failed: %s", e)
 
     def _get_mimetype(self, filename):
         """
