@@ -409,6 +409,7 @@ class FSMController(http.Controller):
         """
         Saves base64 encoded files as task-related attachments
         """
+        attachment_ids = []
         for file in attachment_files:
             try:
                 filename = file.get('filename')
@@ -417,7 +418,7 @@ class FSMController(http.Controller):
                     continue
 
                 decoded = base64.b64decode(encoded_data)
-                request.env['ir.attachment'].sudo().create({
+                attachment = request.env['ir.attachment'].sudo().create({
                     'name': filename,
                     'datas': base64.b64encode(decoded),
                     'res_model': 'project.task',
@@ -425,6 +426,7 @@ class FSMController(http.Controller):
                     'mimetype': self._get_mimetype(filename),
                     'type': 'binary'
                 })
+                attachment_ids.append(attachment.id)
             except Exception as e:
                 _logger.warning("File ignored : %s", e)
 
