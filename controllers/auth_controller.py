@@ -52,7 +52,7 @@ class AuthController(http.Controller):
         """
         User authentication and token generation
         POST /api/auth/login
-        Body: {"login": "admin", "password": "admin"}
+        Body: {"email": "admin", "password": "admin"}
         """
         try:
             db = request.session.db
@@ -63,15 +63,15 @@ class AuthController(http.Controller):
             data = json.loads(
                 request.httprequest.data.decode('utf-8')
             )
-            login = data.get('login')
+            email = data.get('email')
             password = data.get('password')
             credentials = {
-                'login': login,
+                'login': email,
                 'password': password,
                 'type': 'password'
             }
 
-            if not all([db, login, password]):
+            if not all([db, email, password]):
                 return ApiResponse.error_response(
                     'Credentials required', 400
                 )
@@ -96,8 +96,9 @@ class AuthController(http.Controller):
             return ApiResponse.success_response(
                 "Login successfully",
                 {
-                    'user_id': uid,
+                    'userId': uid,
                     'email': user.email,
+                    'name': user.name,
                     'token': token
                 }
             )
@@ -146,7 +147,7 @@ class AuthController(http.Controller):
     def reset_password(self):
         """
         Send an email to reset password
-        """  
+        """
         data = json.loads(
                 request.httprequest.data.decode('utf-8')
             )
