@@ -5,7 +5,7 @@ import mimetypes
 import re
 
 from datetime import datetime
-from odoo import http
+from odoo import http, _
 from odoo.http import request
 from odoo.tools import html2plaintext
 from pytz import UTC
@@ -57,14 +57,13 @@ class FSMController(http.Controller):
                     'sale.order.line'].sudo().search([
                         ('task_id', '=', task.id)])
 
-                material_lines = []
-
-                for line in sale_order_lines:
-                    material_lines.append({
+                material_lines = [
+                    {
                         'material_id': line.product_id.id,
                         'name': line.product_id.name,
                         'quantity': line.product_uom_qty
-                    })
+                    } for line in sale_order_lines
+                ]
 
                 results.append({
                     'id': task.id,
@@ -75,7 +74,7 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.replace(
                         tzinfo=UTC).isoformat()
                     if task.date_deadline else None,
-                    'status': task.stage_id.name if task.stage_id else '',
+                    'status': _(task.stage_id.name) if task.stage_id else '',
                     'priority': self._map_priority(task.priority),
                     'description': html2plaintext(task.description or ''),
                     'client': task.partner_id.name if task.partner_id else '',
@@ -137,13 +136,13 @@ class FSMController(http.Controller):
                 ('task_id', '=', task.id)
             ])
 
-            material_lines = []
-            for line in sale_order_lines:
-                material_lines.append({
-                    'material_id': line.product_id.id,
-                    'name': line.product_id.name,
-                    'quantity': line.product_uom_qty
-                })
+            material_lines = [
+                    {
+                        'material_id': line.product_id.id,
+                        'name': line.product_id.name,
+                        'quantity': line.product_uom_qty
+                    } for line in sale_order_lines
+                ]
 
             task_data = {
                 'id': task.id,
@@ -376,7 +375,7 @@ class FSMController(http.Controller):
 
     def _map_priority(self, priority_value):
         """Map task priority"""
-        return 'Haute' if priority_value == '1' else 'Normale'
+        return _('High') if priority_value == '1' else _('Normal')
 
     def _update_task_data(self, task, values):
         """
