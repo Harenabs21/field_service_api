@@ -367,8 +367,15 @@ class FSMController(http.Controller):
                 comments = task_data.get('comments', [])
                 self._post_comments(task, comments)
 
+                sync_response = [
+                    {
+                        'id': task.id,
+                        'title': task.name
+                    }
+                ]
+
             return ApiResponse.success_response(
-                "Intervention synchronized successfully", {})
+                "Intervention synchronized successfully", sync_response)
 
         except json.JSONDecodeError:
             return ApiResponse.error_response('Invalid JSON format', 400)
