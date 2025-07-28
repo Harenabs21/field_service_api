@@ -68,9 +68,9 @@ class FSMController(http.Controller):
                 results.append({
                     'id': task.id,
                     'title': task.name,
-                    'dateStart': task.date_assign.replace(
+                    'dateStart': task.planned_date_begin.replace(
                         tzinfo=UTC).isoformat()
-                    if task.date_assign else None,
+                    if task.planned_date_begin else None,
                     'dateEnd': task.date_deadline.replace(
                         tzinfo=UTC).isoformat()
                     if task.date_deadline else None,
@@ -147,8 +147,9 @@ class FSMController(http.Controller):
             task_data = {
                 'id': task.id,
                 'title': task.name,
-                'dateStart': task.date_assign.replace(tzinfo=UTC).isoformat()
-                if task.date_assign else None,
+                'dateStart': task.planned_date_begin.replace(
+                    tzinfo=UTC).isoformat()
+                if task.planned_date_begin else None,
                 'dateEnd': task.date_deadline.replace(tzinfo=UTC).isoformat()
                 if task.date_deadline else None,
                 'status': task.stage_id.name if task.stage_id else '',
