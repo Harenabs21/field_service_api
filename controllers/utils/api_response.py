@@ -21,11 +21,12 @@ class ApiResponse:
         )
 
     @staticmethod
-    def error_response(message, status=400):
+    def error_response(message, data, status=400):
         """Formats an error response"""
         response = {
             'success': False,
-            'error': message,
+            'message': message,
+            'data': data or {},
             'timestamp': datetime.now().isoformat()
         }
         return request.make_response(

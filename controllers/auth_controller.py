@@ -16,7 +16,7 @@ def token_required(f):
         token = request.httprequest.headers.get('Authorization')
 
         if not token:
-            return ApiResponse.error_response("Missing token", 401)
+            return ApiResponse.error_response("Missing token", None, 401)
 
         try:
             if token.startswith('Bearer '):
@@ -28,13 +28,14 @@ def token_required(f):
             )
 
             if not user or not user.validate_token(token):
-                return ApiResponse.error_response("Invalid token", 401)
+                return ApiResponse.error_response("Invalid token", None, 401)
 
             request.env.user = user
 
         except Exception as e:
             _logger.error("Error token validation: %s", e)
-            return ApiResponse.error_response("Authentication failed", 401)
+            return ApiResponse.error_response("Authentication failed", None,
+                                              401)
 
         return f(*args, **kwargs)
 
@@ -58,7 +59,7 @@ class AuthController(http.Controller):
             db = request.session.db
             if not db:
                 return ApiResponse.error_response(
-                    'Database not specified', 400
+                    'Database not specified', None, 400
                 )
             data = json.loads(
                 request.httprequest.data.decode('utf-8')
@@ -73,7 +74,7 @@ class AuthController(http.Controller):
 
             if not all([db, email, password]):
                 return ApiResponse.error_response(
-                    'Credentials required', 400
+                    'Credentials required', None, 400
                 )
 
             try:
@@ -82,12 +83,12 @@ class AuthController(http.Controller):
             except Exception as e:
                 _logger.error("Authentication error: %s", e)
                 return ApiResponse.error_response(
-                    'Authentication error', 401
+                    'Authentication error', None, 401
                 )
 
             if not uid:
                 return ApiResponse.error_response(
-                    'Incorrect credentials', 401
+                    'Incorrect credentials', None, 401
                 )
 
             user = request.env['res.users'].sudo().browse(uid)
@@ -105,12 +106,12 @@ class AuthController(http.Controller):
 
         except json.JSONDecodeError:
             return ApiResponse.error_response(
-                'Invalid JSON format', 400
+                'Invalid JSON format', None, 400
             )
         except Exception as e:
             _logger.error("Authentication error: %s", e)
             return ApiResponse.error_response(
-                'Server error', 500
+                'Server error', None, 500
             )
 
     @http.route(
@@ -137,7 +138,7 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Error while verifying the token: %s", e)
             return ApiResponse.error_response(
-                'Server error', 500
+                'Server error', None, 500
             )
 
     @http.route(
@@ -153,12 +154,12 @@ class AuthController(http.Controller):
             )
         login = data.get("email")
         if not login:
-            return ApiResponse.error_response("Email required")
+            return ApiResponse.error_response("Email required", None, 400)
         user = request.env['res.users'].sudo().search(
             [('login', '=', login)], limit=1
             )
         if not user:
-            return ApiResponse.error_response("User not found", 404)
+            return ApiResponse.error_response("User not found", None, 404)
         try:
             user.action_reset_password()
             return ApiResponse.success_response(
@@ -167,7 +168,7 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Server error %s", e)
             return ApiResponse.error_response(
-                "Failed to send reset password of email", 500
+                "Failed to send reset password of email", None, 500
                 )
 
     @http.route(
@@ -190,5 +191,5 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Error while logging out: %s", e)
             return ApiResponse.error_response(
-                'Server error', 500
+                'Server error', None, 500
             )

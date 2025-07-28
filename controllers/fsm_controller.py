@@ -81,7 +81,7 @@ class FSMController(http.Controller):
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
                     'telephone': task.partner_id.phone
-                    if task.partner_id.phone else 'Null',
+                    if task.partner_id.phone else None,
                     'address': re.sub(
                         r'\s+', ' ',
                         task.partner_id.contact_address or ''
@@ -97,7 +97,7 @@ class FSMController(http.Controller):
 
         except Exception as e:
             _logger.error("Error while retrieving task data: %s", e)
-            return ApiResponse.error_response('Server error', 500)
+            return ApiResponse.error_response('Server error',  None, 500)
 
     @http.route(
         '/api/interventions/<int:task_id>',
@@ -123,12 +123,12 @@ class FSMController(http.Controller):
             task = request.env['project.task'].sudo().search(domain)
             if not task.exists():
                 return ApiResponse.error_response('Intervention not found',
-                                                  404
+                                                  None, 404
                                                   )
 
             if current_user not in task.user_ids:
                 return ApiResponse.error_response(
-                    'You can only view your own task', 403
+                      'You can only view your own task', None, 403
                     )
 
             sale_order_lines = request.env['sale.order.line'].sudo().search([
@@ -159,7 +159,7 @@ class FSMController(http.Controller):
                 'long': task.partner_id.partner_longitude,
                 'lat': task.partner_id.partner_latitude,
                 'telephone': task.partner_id.phone
-                if task.partner_id.phone else 'Null',
+                if task.partner_id.phone else None,
                 'address': re.sub(
                     r'\s+', ' ',
                     task.partner_id.contact_address or ''
@@ -174,7 +174,7 @@ class FSMController(http.Controller):
 
         except Exception as e:
             _logger.error("Error retrieving task: %s", e)
-            return ApiResponse.error_response('Server error', 500)
+            return ApiResponse.error_response('Server error',  None, 500)
 
     @http.route(
         '/api/interventions/<int:task_id>/update-status',
@@ -198,19 +198,19 @@ class FSMController(http.Controller):
 
             if not stage_id and not stage_name:
                 return ApiResponse.error_response(
-                    'stage_id or stage_name required', 400
+                      'stage_id or stage_name required', None, 400
                 )
 
             task = request.env['project.task'].sudo().browse(task_id)
 
             if not task or not task.is_fsm:
                 return ApiResponse.error_response(
-                    'Task not found or not a FSM task', 404
+                      'Task not found or not a FSM task', None, 404
                 )
 
             if request.env.user not in task.user_ids:
                 return ApiResponse.error_response(
-                    'You can only edit your own tasks', 403
+                      'You can only edit your own tasks', None, 403
                 )
 
             if stage_id:
@@ -224,7 +224,7 @@ class FSMController(http.Controller):
                 ], limit=1)
 
             if not stage:
-                return ApiResponse.error_response('Invalid stage', 400)
+                return ApiResponse.error_response('Invalid stage', None, 400)
 
             task.write({'stage_id': stage.id})
             task_response = {
@@ -237,10 +237,10 @@ class FSMController(http.Controller):
                                                 )
 
         except json.JSONDecodeError:
-            return ApiResponse.error_response('Invalid JSON format', 400)
+            return ApiResponse.error_response('Invalid JSON format', None, 400)
         except Exception as e:
             _logger.error("Error updating status: %s", e)
-            return ApiResponse.error_response('Server error', 500)
+            return ApiResponse.error_response('Server error',  None, 500)
 
     @http.route(
         '/api/interventions/<int:task_id>/create-timesheet',
@@ -270,10 +270,11 @@ class FSMController(http.Controller):
 
             if not task.exists() or not task.is_fsm:
                 response = ApiResponse.error_response(
-                    'FSM task not found', 404)
+                      'FSM task not found', None, 404)
             elif request.env.user not in task.user_ids:
                 response = ApiResponse.error_response(
-                    'You can only create timesheets for your own tasks', 403
+                    'You can only create timesheets for your own tasks', None,
+                    403
                 )
             else:
                 date_str = data.get('date')
@@ -312,13 +313,14 @@ class FSMController(http.Controller):
                     )
                 except ValueError:
                     response = ApiResponse.error_response(
-                        'Invalid date format. Use YYYY-MM-DD.', 400
+                      'Invalid date format. Use YYYY-MM-DD.', None, 400
                     )
         except json.JSONDecodeError:
-            response = ApiResponse.error_response('Invalid JSON format', 400)
+            response = ApiResponse.error_response('Invalid JSON format', None,
+                                                  400)
         except Exception as e:
             _logger.error("Error while creating timesheet: %s", e)
-            response = ApiResponse.error_response('Server error', 500)
+            response = ApiResponse.error_response('Server error', None, 500)
 
         return response
 
@@ -342,7 +344,8 @@ class FSMController(http.Controller):
             data = json.loads(request.httprequest.data.decode('utf-8'))
             tasks_data = data.get('data', [])
             if not tasks_data:
-                return ApiResponse.error_response("No tasks provided", 400)
+                return ApiResponse.error_response("No tasks provided", None,
+                                                  400)
 
             for task_data in tasks_data:
                 task_id = task_data.get('id')
@@ -350,11 +353,11 @@ class FSMController(http.Controller):
                 task = request.env['project.task'].sudo().browse(task_id)
                 if not task.exists() or not task.is_fsm:
                     return ApiResponse.error_response(
-                        "Task not found or not a FSM task", 404)
+                          "Task not found or not a FSM task", None, 404)
 
                 if request.env.user not in task.user_ids:
                     return ApiResponse.error_response(
-                        "You can only sync your own tasks", 403)
+                          "You can only sync your own tasks", None, 403)
 
                 status = task_data.get('status')
                 timesheets = task_data.get('timesheets', [])
@@ -378,10 +381,10 @@ class FSMController(http.Controller):
                 "Intervention synchronized successfully", sync_response)
 
         except json.JSONDecodeError:
-            return ApiResponse.error_response('Invalid JSON format', 400)
+            return ApiResponse.error_response('Invalid JSON format', None, 400)
         except Exception as e:
             _logger.error("Error in sync: %s", e)
-            return ApiResponse.error_response('Server error', 500)
+            return ApiResponse.error_response('Server error', None, 500)
 
     def _map_priority(self, priority_value):
         """Map task priority"""
