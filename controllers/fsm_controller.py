@@ -59,7 +59,7 @@ class FSMController(http.Controller):
 
                 material_lines = [
                     {
-                        'material_id': line.product_id.id,
+                        'materialId': line.product_id.id,
                         'name': line.product_id.name,
                         'quantity': line.product_uom_qty
                     } for line in sale_order_lines
@@ -81,13 +81,12 @@ class FSMController(http.Controller):
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
                     'telephone': task.partner_id.phone
-                    if task.partner_id else '',
+                    if task.partner_id.phone else 'Null',
                     'address': re.sub(
                         r'\s+', ' ',
                         task.partner_id.contact_address or ''
                     ).strip(),
-                    'distance': task.distance
-                    if hasattr(task, 'distance') else None,
+                    'distance': task.distance if task.distance else 0,
                     'materials': material_lines
                 })
 
@@ -138,7 +137,7 @@ class FSMController(http.Controller):
 
             material_lines = [
                     {
-                        'material_id': line.product_id.id,
+                        'materialId': line.product_id.id,
                         'name': line.product_id.name,
                         'quantity': line.product_uom_qty
                     } for line in sale_order_lines
@@ -150,21 +149,22 @@ class FSMController(http.Controller):
                 'dateStart': task.planned_date_begin.replace(
                     tzinfo=UTC).isoformat()
                 if task.planned_date_begin else None,
-                'dateEnd': task.date_deadline.replace(tzinfo=UTC).isoformat()
+                'dateEnd': task.date_deadline.replace(
+                    tzinfo=UTC).isoformat()
                 if task.date_deadline else None,
-                'status': task.stage_id.name if task.stage_id else '',
+                'status': _(task.stage_id.name) if task.stage_id else '',
                 'priority': self._map_priority(task.priority),
                 'description': html2plaintext(task.description or ''),
                 'client': task.partner_id.name if task.partner_id else '',
                 'long': task.partner_id.partner_longitude,
                 'lat': task.partner_id.partner_latitude,
-                'telephone': task.partner_id.phone if task.partner_id else '',
+                'telephone': task.partner_id.phone
+                if task.partner_id.phone else 'Null',
                 'address': re.sub(
                     r'\s+', ' ',
                     task.partner_id.contact_address or ''
                 ).strip(),
-                'distance': task.distance
-                if hasattr(task, 'distance') else None,
+                'distance': task.distance if task.distance else 0,
                 'materials': material_lines
             }
 
@@ -340,13 +340,12 @@ class FSMController(http.Controller):
         """
         try:
             data = json.loads(request.httprequest.data.decode('utf-8'))
-            tasks_data = data.get('tasks', [])
+            tasks_data = data.get('data', [])
             if not tasks_data:
                 return ApiResponse.error_response("No tasks provided", 400)
 
             for task_data in tasks_data:
-                task_id = task_data.get('task_id')
-                values = task_data.get('values', {})
+                task_id = task_data.get('id')
 
                 task = request.env['project.task'].sudo().browse(task_id)
                 if not task.exists() or not task.is_fsm:
@@ -357,12 +356,15 @@ class FSMController(http.Controller):
                     return ApiResponse.error_response(
                         "You can only sync your own tasks", 403)
 
-                self._update_task_data(task, values)
+                status = task_data.get('status')
+                timesheets = task_data.get('timesheets', [])
 
-                attachment_files = values.get('attachment_files', [])
+                self._update_task_data(task, status, timesheets)
+
+                attachment_files = task_data.get('attachment_files', [])
                 self._upload_files(task, attachment_files)
 
-                comments = values.get('comments', [])
+                comments = task_data.get('comments', [])
                 self._post_comments(task, comments)
 
             return ApiResponse.success_response(
@@ -378,13 +380,13 @@ class FSMController(http.Controller):
         """Map task priority"""
         return _('High') if priority_value == '1' else _('Normal')
 
-    def _update_task_data(self, task, values):
+    def _update_task_data(self, task, status=None, timesheets=None):
         """
         Updates status and adds timesheets
         """
         updates = {}
 
-        new_status = values.get('status')
+        new_status = status
         if new_status:
             stage = request.env['project.task.type'].sudo().search([
                 ('name', '=', new_status),
@@ -393,7 +395,7 @@ class FSMController(http.Controller):
             if stage:
                 updates['stage_id'] = stage.id
 
-        timesheet_entries = values.get('timesheets', [])
+        timesheet_entries = timesheets or []
         new_timesheet_ids = []
 
         for entry in timesheet_entries:
