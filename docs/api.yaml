@@ -107,6 +107,9 @@ paths:
           in: query
           schema:
             type: string
+            enum:
+              - 0
+              - 1
       responses:
         '200':
           description: List of interventions
@@ -274,9 +277,104 @@ paths:
         '404':
           description: Task not found
 
+  /api/interventions/sync:
+    post:
+      tags:
+        - Interventions
+      summary: Sync interventions
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        $ref: '#/components/requestBodies/syncBody'
+
+      responses:
+        '200':
+          description: Sync successful
+          content:
+            application/json:
+              example:
+                message: "Sync completed successfully."        
+
 components:
+  requestBodies:
+    timesheetBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Timesheet'
+    attachmentFilesBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AttachmentFilesBody'
+    commentsBody:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/CommentsBody'
+    syncBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tasks:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    task_id:
+                      type: integer
+                    values:
+                      type: object
+                      properties:
+                        timesheets:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/Timesheet'
+                        comments:
+                          type: array
+                          items:
+                            $ref: '#/components/schemas/CommentsBody'
+                        attachment_files:
+                            $ref: '#/components/schemas/AttachmentFilesBody'
+
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  schemas:
+    attachmentFiles:
+      type: object
+      properties:
+        filename:
+          type: string
+        data:
+          type: string
+          format: base64
+    Timesheet:
+      type: object
+      properties:
+        description:
+          type: string
+        unit_amount:
+          type: number
+        date:
+          type: string
+          format: date
+    AttachmentFilesBody:
+      type: array
+      items:
+        $ref: '#/components/schemas/attachmentFiles'
+    CommentsBody:
+      type: object
+      properties:
+        message:
+          type: string
+        attachment_files:
+          type: array
+          items:
+            $ref: '#/components/schemas/attachmentFiles'
