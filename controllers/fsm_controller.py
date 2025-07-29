@@ -364,8 +364,11 @@ class FSMController(http.Controller):
 
                 self._update_task_data(task, status, timesheets)
 
-                attachment_files = task_data.get('attachment_files', [])
-                self._upload_files(task, attachment_files)
+                photos = task_data.get('photos', [])
+                self._upload_files(task, photos)
+
+                documents = task_data.get('documents', [])
+                self._upload_files(task, documents)
 
                 comments = task_data.get('comments', [])
                 self._post_comments(task, comments)
@@ -443,13 +446,25 @@ class FSMController(http.Controller):
                     continue
 
                 decoded = base64.b64decode(encoded_data)
+
+                extension = filename.split('.')[-1].lower()
+
+                if extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
+                    file_type = 'photo'
+                elif extension in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt',
+                                   'mp4', 'mp3']:
+                    file_type = 'document'
+                else:
+                    file_type = 'autre'
+
                 attachment = request.env['ir.attachment'].sudo().create({
                     'name': filename,
                     'datas': base64.b64encode(decoded),
                     'res_model': 'project.task',
                     'res_id': task.id,
                     'mimetype': self._get_mimetype(filename),
-                    'type': 'binary'
+                    'type': 'binary',
+                    'description': file_type,
                 })
                 attachment_ids.append(attachment.id)
             except Exception as e:
