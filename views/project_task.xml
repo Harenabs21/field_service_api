@@ -6,15 +6,11 @@
     <field name="inherit_id" ref="project.view_task_form2"/>
     <field name="arch" type="xml">
       <xpath expr="//page[@name='extra_info']" position="after">
-        <page string="Signature Client">
+        <page string="Signature Client" invisible="not is_fsm">
           <group>
             <field name="customer_signature" 
                 filename="customer_signature_filename" 
-                widget="image"
-                options="{
-                'preview_image': 'customer_signature', 
-                'size': [300, 0]
-                }"
+                widget="signature"
             />
           </group>
         </page>
