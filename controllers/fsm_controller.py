@@ -59,7 +59,7 @@ class FSMController(http.Controller):
 
                 material_lines = [
                     {
-                        'materialId': line.product_id.id,
+                        'id': line.product_id.id,
                         'name': line.product_id.name,
                         'quantity': line.product_uom_qty
                     } for line in sale_order_lines
@@ -75,7 +75,7 @@ class FSMController(http.Controller):
                         tzinfo=UTC).isoformat()
                     if task.date_deadline else None,
                     'status': _(task.stage_id.name) if task.stage_id else '',
-                    'priority': self._map_priority(task.priority),
+                    'priority': task.priority if task.priority else '',
                     'description': html2plaintext(task.description or ''),
                     'customer': task.partner_id.name if task.partner_id
                     else '',
@@ -138,7 +138,7 @@ class FSMController(http.Controller):
 
             material_lines = [
                     {
-                        'materialId': line.product_id.id,
+                        'id': line.product_id.id,
                         'name': line.product_id.name,
                         'quantity': line.product_uom_qty
                     } for line in sale_order_lines
@@ -154,7 +154,7 @@ class FSMController(http.Controller):
                     tzinfo=UTC).isoformat()
                 if task.date_deadline else None,
                 'status': _(task.stage_id.name) if task.stage_id else '',
-                'priority': self._map_priority(task.priority),
+                'priority': task.priority if task.priority else '',
                 'description': html2plaintext(task.description or ''),
                 'customer': task.partner_id.name if task.partner_id else '',
                 'long': task.partner_id.partner_longitude,
@@ -394,10 +394,6 @@ class FSMController(http.Controller):
             _logger.error("Error in sync: %s", e)
             return ApiResponse.error_response('Server error', None, 500)
 
-    def _map_priority(self, priority_value):
-        """Map task priority"""
-        return _('High') if priority_value == '1' else _('Normal')
-
     def _update_task_data(self, task, status=None, timesheets=None):
         """
         Updates status and adds timesheets
@@ -426,7 +422,7 @@ class FSMController(http.Controller):
                 'task_id': task.id,
                 'project_id': task.project_id.id if task.project_id else None,
                 'name': entry.get('description', ''),
-                'unit_amount': float(entry.get('time_allocated', 0)),
+                'unit_amount': float(entry.get('timeAllocated', 0)),
                 'date': date,
                 'user_id': request.env.user.id
             })
