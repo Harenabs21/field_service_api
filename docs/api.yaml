@@ -23,12 +23,12 @@ paths:
             schema:
               type: object
               properties:
-                login:
+                email:
                   type: string
                 password:
                   type: string
               required:
-                - login
+                - email
                 - password
       responses:
         '200':
@@ -108,8 +108,8 @@ paths:
           schema:
             type: string
             enum:
-              - 0
-              - 1
+              - "0"
+              - "1"
       responses:
         '200':
           description: List of interventions
@@ -121,8 +121,8 @@ paths:
                   dateStart: "2025-07-01"
                   dateEnd: "2025-07-01"
                   status: "Scheduled"
-                  priority: "High"
-                  client: "John Doe"
+                  priority: "1"
+                  customer: "John Doe"
                   distance: 10.5
                   description: "Routine maintenance for plumbing system."
                   long: 0.0
@@ -130,10 +130,10 @@ paths:
                   telephone: "123-456-7890"
                   address: "123 Main St, City, Country"
                   materials:
-                  - material_id: 1
+                  - id: 1
                     name: "Pipe"
                     quantity: 5
-                  - material_id: 2
+                  - id: 2
                     name: "Faucet"
                     quantity: 2
                 - id: 2
@@ -141,8 +141,8 @@ paths:
                   dateStart: "2025-07-02"
                   dateEnd: "2025-07-02"
                   status: "In Progress"
-                  priority: "Medium"
-                  client: "Jane Smith"
+                  priority: "0"
+                  customer: "Jane Smith"
                   distance: 5.0
                   description: "Routine maintenance for plumbing system."
                   long: 0.0
@@ -150,10 +150,10 @@ paths:
                   telephone: "123-456-7890"
                   address: "123 Main St, City, Country"
                   materials:
-                  - material_id: 1
+                  - id: 1
                     name: "Pipe"
                     quantity: 5
-                  - material_id: 2
+                  - id: 2
                     name: "Faucet"
                     quantity: 2
 
@@ -182,7 +182,7 @@ paths:
                 dateEnd: "2025-07-01"
                 status: "Scheduled"
                 priority: "High"
-                client: "John Doe"
+                customer: "John Doe"
                 distance: 10.5
                 description: "Routine maintenance for plumbing system."
                 long: 0.0
@@ -190,10 +190,10 @@ paths:
                 telephone: "123-456-7890"
                 address: "123 Main St, City, Country"
                 materials:
-                  - material_id: 1
+                  - id: 1
                     name: "Pipe"
                     quantity: 5
-                  - material_id: 2
+                  - id: 2
                     name: "Faucet"
                     quantity: 2
         '404':
@@ -255,7 +255,7 @@ paths:
               properties:
                 description:
                   type: string
-                unit_amount:
+                timeAllocated:
                   type: number
                 date:
                   type: string
@@ -324,21 +324,23 @@ components:
                 items:
                   type: object
                   properties:
-                    task_id:
+                    id:
                       type: integer
-                    values:
-                      type: object
-                      properties:
-                        timesheets:
-                          type: array
-                          items:
-                            $ref: '#/components/schemas/Timesheet'
-                        comments:
-                          type: array
-                          items:
-                            $ref: '#/components/schemas/CommentsBody'
-                        attachment_files:
-                            $ref: '#/components/schemas/AttachmentFilesBody'
+                    timesheets:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Timesheet'
+                    comments:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/CommentsBody'
+                    photos:
+                        $ref: '#/components/schemas/AttachmentFilesBody'
+                    documents:
+                        $ref: '#/components/schemas/AttachmentFilesBody'
+                    signature:
+                        $ref: '#/components/schemas/attachmentFiles'
+
 
   securitySchemes:
     bearerAuth:
@@ -360,7 +362,7 @@ components:
       properties:
         description:
           type: string
-        unit_amount:
+        timeAllocated:
           type: number
         date:
           type: string
@@ -374,7 +376,10 @@ components:
       properties:
         message:
           type: string
-        attachment_files:
+        dateCreated:
+          type: string
+          format: date-time
+        attachmentFiles:
           type: array
           items:
             $ref: '#/components/schemas/attachmentFiles'
