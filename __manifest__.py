@@ -10,25 +10,21 @@ Long description of module's purpose
 
     'author': "Harena Sarobidy",
     'website': "https://github.com/Harenabs21",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
     'category': 'Industry',
     'version': '0.1',
 
     # any module necessary for this one to work correctly
-    'depends': ['base','industry_fsm'],
+    'depends': ['base', 'industry_fsm'],
 
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
         'views/views.xml',
         'views/templates.xml',
+        'views/project_task.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
         'demo/demo.xml',
     ],
 }
-
