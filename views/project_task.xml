@@ -8,11 +8,11 @@
       <xpath expr="//page[@name='extra_info']" position="after">
         <page string="Signature Client">
           <group>
-            <field name="client_signature" 
-                filename="client_signature_filename" 
+            <field name="customer_signature" 
+                filename="customer_signature_filename" 
                 widget="image"
                 options="{
-                'preview_image': 'client_signature', 
+                'preview_image': 'customer_signature', 
                 'size': [300, 0]
                 }"
             />

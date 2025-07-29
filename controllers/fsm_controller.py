@@ -77,7 +77,8 @@ class FSMController(http.Controller):
                     'status': _(task.stage_id.name) if task.stage_id else '',
                     'priority': self._map_priority(task.priority),
                     'description': html2plaintext(task.description or ''),
-                    'client': task.partner_id.name if task.partner_id else '',
+                    'customer': task.partner_id.name if task.partner_id
+                    else '',
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
                     'telephone': task.partner_id.phone
@@ -155,7 +156,7 @@ class FSMController(http.Controller):
                 'status': _(task.stage_id.name) if task.stage_id else '',
                 'priority': self._map_priority(task.priority),
                 'description': html2plaintext(task.description or ''),
-                'client': task.partner_id.name if task.partner_id else '',
+                'customer': task.partner_id.name if task.partner_id else '',
                 'long': task.partner_id.partner_longitude,
                 'lat': task.partner_id.partner_latitude,
                 'telephone': task.partner_id.phone
@@ -517,7 +518,7 @@ class FSMController(http.Controller):
 
     def _upload_signature(self, task, signature):
         """
-        Upload and save client signature
+        Upload and save customer signature
         """
         try:
             filename = signature.get('filename')
@@ -529,8 +530,8 @@ class FSMController(http.Controller):
             decoded = base64.b64decode(encoded_data)
 
             task.write({
-                'client_signature': base64.b64encode(decoded),
-                'client_signature_filename': filename
+                'customer_signature': base64.b64encode(decoded),
+                'customer_signature_filename': filename
             })
         except Exception as e:
             _logger.warning("Failed to save signature: %s", e)
