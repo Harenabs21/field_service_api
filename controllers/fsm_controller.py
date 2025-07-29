@@ -373,6 +373,10 @@ class FSMController(http.Controller):
                 comments = task_data.get('comments', [])
                 self._post_comments(task, comments)
 
+                signature = task_data.get('signature')
+                if signature:
+                    self._upload_signature(task, signature)
+
                 sync_response = [
                     {
                         'id': task.id,
@@ -478,7 +482,9 @@ class FSMController(http.Controller):
         for comment in comments:
             try:
                 message_body = comment.get('message')
-                attachment_files = comment.get('attachment_files', [])
+                attachment_files = comment.get('attachmentFiles', [])
+                dateCreated = comment.get('dateCreated',
+                                          datetime.now().isoformat())
 
                 if not message_body:
                     continue
@@ -490,6 +496,7 @@ class FSMController(http.Controller):
                 request.env['mail.message'].sudo().create({
                     'body': message_body,
                     'model': 'project.task',
+                    'date': dateCreated,
                     'res_id': task.id,
                     'message_type': 'comment',
                     'subtype_id': note_subtype.id if note_subtype else None,
@@ -507,3 +514,23 @@ class FSMController(http.Controller):
         """
         mimetype, _ = mimetypes.guess_type(filename)
         return mimetype or 'application/octet-stream'
+
+    def _upload_signature(self, task, signature):
+        """
+        Upload and save client signature
+        """
+        try:
+            filename = signature.get('filename')
+            encoded_data = signature.get('data')
+
+            if not filename or not encoded_data:
+                return
+
+            decoded = base64.b64decode(encoded_data)
+
+            task.write({
+                'client_signature': base64.b64encode(decoded),
+                'client_signature_filename': filename
+            })
+        except Exception as e:
+            _logger.warning("Failed to save signature: %s", e)
