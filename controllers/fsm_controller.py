@@ -465,7 +465,7 @@ class FSMController(http.Controller):
                 attachment_files = comment.get('attachmentFiles', [])
                 date_str = comment.get('dateCreated',
                                        datetime.now().isoformat())
-                date_to_format = date_str = date_str.split('.')[0].replace(
+                date_to_format = date_str.split('.')[0].replace(
                     'T', ' ')
                 dateCreated = datetime.strptime(date_to_format,
                                                 "%Y-%m-%d %H:%M:%S")
