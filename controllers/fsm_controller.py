@@ -59,10 +59,10 @@ class FSMController(http.Controller):
                     'id': task.id,
                     'title': task.name,
                     'dateStart': task.planned_date_begin.astimezone(
-                        UTC).strftime('%d/%m/%y')
+                        UTC).strftime('%d/%m/%Y')
                     if task.planned_date_begin else None,
                     'dateEnd': task.date_deadline.astimezone(
-                        UTC).strftime('%d/%m/%y')
+                        UTC).strftime('%d/%m/%Y')
                     if task.date_deadline else None,
                     'status': _(task.stage_id.name) if task.stage_id else '',
                     'priority': task.priority if task.priority else '',
@@ -128,10 +128,10 @@ class FSMController(http.Controller):
                 'id': task.id,
                 'title': task.name,
                 'dateStart': task.planned_date_begin.astimezone(
-                    UTC).strftime('%d/%m/%y')
+                    UTC).strftime('%d/%m/%Y')
                 if task.planned_date_begin else None,
                 'dateEnd': task.date_deadline.astimezone(
-                    UTC).strftime('%d/%m/%y')
+                    UTC).strftime('%d/%m/%Y')
                 if task.date_deadline else None,
                 'status': _(task.stage_id.name) if task.stage_id else '',
                 'priority': task.priority if task.priority else '',
