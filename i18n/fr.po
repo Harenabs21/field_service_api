@@ -1,0 +1,56 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* field_service_api
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e-20250624\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-07-30 13:08+0000\n"
+"PO-Revision-Date: 2025-07-30 13:08+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_res_users__access_token
+msgid "Access token"
+msgstr ""
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_project_task__customer_signature
+msgid "Customer Signature"
+msgstr "Signature client"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_project_task__distance
+msgid "Distance (km)"
+msgstr ""
+
+#. module: field_service_api
+#: model_terms:ir.ui.view,arch_db:field_service_api.view_project_task_form_inherit_signature_tab
+msgid "Signature Client"
+msgstr ""
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_project_task__customer_signature_filename
+msgid "Signature Filename"
+msgstr ""
+
+#. module: field_service_api
+#: model:ir.model,name:field_service_api.model_project_task
+msgid "Task"
+msgstr "Tâche"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_res_users__token_expiry
+msgid "Token Expiry"
+msgstr ""
+
+#. module: field_service_api
+#: model:ir.model,name:field_service_api.model_res_users
+msgid "User"
+msgstr "Utilisateur"
