@@ -53,17 +53,7 @@ class FSMController(http.Controller):
 
             results = []
             for task in tasks:
-                sale_order_lines = request.env[
-                    'sale.order.line'].sudo().search([
-                        ('task_id', '=', task.id)])
-
-                material_lines = [
-                    {
-                        'id': line.product_id.id,
-                        'name': line.product_id.name,
-                        'quantity': line.product_uom_qty
-                    } for line in sale_order_lines
-                ]
+                material_lines = self._get_material_lines(task)
 
                 results.append({
                     'id': task.id,
@@ -132,17 +122,7 @@ class FSMController(http.Controller):
                       'You can only view your own task', None, 403
                     )
 
-            sale_order_lines = request.env['sale.order.line'].sudo().search([
-                ('task_id', '=', task.id)
-            ])
-
-            material_lines = [
-                    {
-                        'id': line.product_id.id,
-                        'name': line.product_id.name,
-                        'quantity': line.product_uom_qty
-                    } for line in sale_order_lines
-                ]
+            material_lines = self._get_material_lines(task)
 
             task_data = {
                 'id': task.id,
@@ -535,3 +515,22 @@ class FSMController(http.Controller):
             })
         except Exception as e:
             _logger.warning("Failed to save signature: %s", e)
+
+    def _get_material_lines(self, task):
+        """
+        Retrieve material lines for the task
+        """
+        sale_order_lines = request.env['sale.order.line'].sudo().search([
+                ('task_id', '=', task.id),
+                ('product_uom_qty', '>', 0)
+            ])
+
+        material_lines = [
+                {
+                    'id': line.product_id.id,
+                    'name': line.product_id.name,
+                    'quantity': line.product_uom_qty
+                } for line in sale_order_lines
+            ]
+
+        return material_lines
