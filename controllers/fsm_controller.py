@@ -158,7 +158,7 @@ class FSMController(http.Controller):
             return ApiResponse.error_response('Server error',  None, 500)
 
     @http.route(
-        '/api/interventions/<int:task_id>/update-status',
+        '/api/interventions/update-status',
         type='http',
         auth='public',
         methods=['PUT'],
@@ -166,23 +166,27 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
-    def update_task_status(self, task_id):
+    def update_task_status(self):
         """
         Update task status
-        PUT /api/interventions/<task_id>/update-status
+        PUT /api/interventions/update-status
         Headers: Authorization: Bearer <token>
+        Body: {
+            statusId: <stage_id>,
+            interventionId: <task_id>
+        }
         """
         try:
             data = json.loads(request.httprequest.data.decode('utf-8'))
-            stage_id = data.get('status_id')
-            stage_name = data.get('status_name')
+            stage_id = data.get('statusId')
+            intervention_id = data.get('interventionId')
 
-            if not stage_id and not stage_name:
+            if not stage_id and not intervention_id:
                 return ApiResponse.error_response(
-                      'stage_id or stage_name required', None, 400
+                      'stageId or interventionId required', None, 400
                 )
 
-            task = request.env['project.task'].sudo().browse(task_id)
+            task = request.env['project.task'].sudo().browse(intervention_id)
 
             if not task or not task.is_fsm:
                 return ApiResponse.error_response(
@@ -194,27 +198,17 @@ class FSMController(http.Controller):
                       'You can only edit your own tasks', None, 403
                 )
 
-            if stage_id:
-                stage = request.env['project.task.type'].sudo().browse(
-                    stage_id
-                    )
-            else:
-                stage = request.env['project.task.type'].sudo().search([
-                    ('name', '=', stage_name),
-                    ('project_ids', 'in', task.project_id.id)
-                ], limit=1)
+            status = request.env['project.task.type'].sudo().browse(
+                stage_id
+                )
 
-            if not stage:
+            if not status:
                 return ApiResponse.error_response('Invalid stage', None, 400)
 
-            task.write({'stage_id': stage.id})
-            task_response = {
-                'status_id': stage.id,
-                'status_name': stage.name
-            }
+            task.write({'stage_id': status.id})
 
             return ApiResponse.success_response("Status updated successfully",
-                                                task_response
+                                                None
                                                 )
 
         except json.JSONDecodeError:
