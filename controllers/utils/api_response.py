@@ -26,7 +26,7 @@ class ApiResponse:
         response = {
             'success': False,
             'message': message,
-            'data': data or {},
+            'data': data,
             'timestamp': datetime.now().isoformat()
         }
         return request.make_response(

@@ -163,7 +163,7 @@ class AuthController(http.Controller):
         try:
             user.action_reset_password()
             return ApiResponse.success_response(
-                "Password reset link sent successfully", {}
+                "Password reset link sent successfully", None
                 )
         except Exception as e:
             _logger.error("Server error %s", e)
@@ -186,7 +186,7 @@ class AuthController(http.Controller):
             user = request.env.user
             user.invalidate_token()
             return ApiResponse.success_response(
-                "Log out successfully", {}
+                "Log out successfully", None
             )
         except Exception as e:
             _logger.error("Error while logging out: %s", e)
