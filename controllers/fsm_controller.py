@@ -68,11 +68,11 @@ class FSMController(http.Controller):
                 results.append({
                     'id': task.id,
                     'title': task.name,
-                    'dateStart': task.planned_date_begin.replace(
-                        tzinfo=UTC).isoformat()
+                    'dateStart': task.planned_date_begin.astimezone(
+                        UTC).strftime('%d-%m-%y %H:%M:%S')
                     if task.planned_date_begin else None,
-                    'dateEnd': task.date_deadline.replace(
-                        tzinfo=UTC).isoformat()
+                    'dateEnd': task.date_deadline.astimezone(
+                        UTC).strftime('%d-%m-%y %H:%M:%S')
                     if task.date_deadline else None,
                     'status': _(task.stage_id.name) if task.stage_id else '',
                     'priority': task.priority if task.priority else '',
@@ -147,11 +147,11 @@ class FSMController(http.Controller):
             task_data = {
                 'id': task.id,
                 'title': task.name,
-                'dateStart': task.planned_date_begin.replace(
-                    tzinfo=UTC).isoformat()
+                'dateStart': task.planned_date_begin.astimezone(
+                    UTC).strftime('%d-%m-%y %H:%M:%S')
                 if task.planned_date_begin else None,
-                'dateEnd': task.date_deadline.replace(
-                    tzinfo=UTC).isoformat()
+                'dateEnd': task.date_deadline.astimezone(
+                    UTC).strftime('%d-%m-%y %H:%M:%S')
                 if task.date_deadline else None,
                 'status': _(task.stage_id.name) if task.stage_id else '',
                 'priority': task.priority if task.priority else '',
@@ -480,8 +480,12 @@ class FSMController(http.Controller):
             try:
                 message_body = comment.get('message')
                 attachment_files = comment.get('attachmentFiles', [])
-                dateCreated = comment.get('dateCreated',
-                                          datetime.now().isoformat())
+                date_str = comment.get('dateCreated',
+                                       datetime.now().isoformat())
+                date_to_format = date_str = date_str.split('.')[0].replace(
+                    'T', ' ')
+                dateCreated = datetime.strptime(date_to_format,
+                                                "%Y-%m-%d %H:%M:%S")
 
                 if not message_body:
                     continue
