@@ -72,7 +72,7 @@ class FSMController(http.Controller):
                     'long': task.partner_id.partner_longitude,
                     'lat': task.partner_id.partner_latitude,
                     'telephone': task.partner_id.phone
-                    if task.partner_id.phone else None,
+                    if task.partner_id.phone else '',
                     'address': re.sub(
                         r'\s+', ' ',
                         task.partner_id.contact_address or ''
@@ -140,7 +140,7 @@ class FSMController(http.Controller):
                 'long': task.partner_id.partner_longitude,
                 'lat': task.partner_id.partner_latitude,
                 'telephone': task.partner_id.phone
-                if task.partner_id.phone else None,
+                if task.partner_id.phone else '',
                 'address': re.sub(
                     r'\s+', ' ',
                     task.partner_id.contact_address or ''
