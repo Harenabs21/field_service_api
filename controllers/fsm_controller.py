@@ -5,7 +5,7 @@ import mimetypes
 import re
 
 from datetime import datetime
-from odoo import http, _
+from odoo import http
 from odoo.http import request
 from odoo.tools import html2plaintext
 from pytz import UTC
@@ -64,7 +64,7 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.astimezone(
                         UTC).strftime('%d/%m/%Y')
                     if task.date_deadline else None,
-                    'status': _(task.stage_id.name) if task.stage_id else '',
+                    'status': task.stage_id.id if task.stage_id else '',
                     'priority': task.priority if task.priority else '',
                     'description': html2plaintext(task.description or ''),
                     'customer': task.partner_id.name if task.partner_id
@@ -133,7 +133,7 @@ class FSMController(http.Controller):
                 'dateEnd': task.date_deadline.astimezone(
                     UTC).strftime('%d/%m/%Y')
                 if task.date_deadline else None,
-                'status': _(task.stage_id.name) if task.stage_id else '',
+                'status': task.stage_id.id if task.stage_id else '',
                 'priority': task.priority if task.priority else '',
                 'description': html2plaintext(task.description or ''),
                 'customer': task.partner_id.name if task.partner_id else '',
@@ -496,7 +496,7 @@ class FSMController(http.Controller):
         """
         Dynamically guess the mimetype from the filename
         """
-        mimetype, _ = mimetypes.guess_type(filename)
+        mimetype = mimetypes.guess_type(filename)
         return mimetype or 'application/octet-stream'
 
     def _upload_signature(self, task, signature):
