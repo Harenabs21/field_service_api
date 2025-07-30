@@ -358,6 +358,9 @@ class FSMController(http.Controller):
                 if signature:
                     self._upload_signature(task, signature)
 
+                materials = task_data.get('materials', [])
+                self._sync_materials(task, materials)
+
                 sync_response = [
                     {
                         'id': task.id,
@@ -534,3 +537,43 @@ class FSMController(http.Controller):
             ]
 
         return material_lines
+
+    def _sync_materials(self, task, materials):
+        """
+        Synchronize equipment (products) linked to an intervention (Task)
+        - Updates the quantity if the product already exists
+        - Create a line if the product is not yet linked
+        - Puts the quantity if requested (but does not delete)
+        """
+        sale_order_line = request.env['sale.order.line'].sudo()
+        existing_lines = sale_order_line.search([('task_id', '=', task.id)])
+
+        existing_map = {line.product_id.id: line for line in existing_lines}
+
+        for item in materials:
+            product_id = item.get('id')
+            quantity = float(item.get('quantity', 0))
+
+            if not product_id:
+                continue
+
+            existing_line = existing_map.get(product_id)
+
+            if existing_line:
+                existing_line.write({
+                    'product_uom_qty': quantity
+                })
+            else:
+                if quantity > 0:
+                    product = request.env['product.product'].sudo().browse(
+                        product_id)
+                    if product.exists():
+                        request.env['sale.order.line'].sudo().create({
+                            'task_id': task.id,
+                            'order_id': task.sale_order_id.id,
+                            'product_id': product.id,
+                            'product_uom_qty': quantity,
+                            'product_uom': product.uom_id.id,
+                            'price_unit': product.lst_price,
+                            'name': product.name,
+                        })
