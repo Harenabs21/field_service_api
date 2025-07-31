@@ -64,7 +64,8 @@ class FSMController(http.Controller):
                     'dateEnd': task.date_deadline.astimezone(
                         UTC).strftime('%d/%m/%Y')
                     if task.date_deadline else None,
-                    'status': task.stage_id.id if task.stage_id else '',
+                    'status': task.stage_id.stage_sequence if task.stage_id
+                    else None,
                     'priority': task.priority if task.priority else '',
                     'description': html2plaintext(task.description or ''),
                     'customer': task.partner_id.name if task.partner_id
@@ -133,7 +134,7 @@ class FSMController(http.Controller):
                 'dateEnd': task.date_deadline.astimezone(
                     UTC).strftime('%d/%m/%Y')
                 if task.date_deadline else None,
-                'status': task.stage_id.id if task.stage_id else '',
+                'status': self._map_status_id(task.stage_id.name),
                 'priority': task.priority if task.priority else '',
                 'description': html2plaintext(task.description or ''),
                 'customer': task.partner_id.name if task.partner_id else '',
