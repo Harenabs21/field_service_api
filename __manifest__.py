@@ -22,6 +22,7 @@ Long description of module's purpose
         'views/views.xml',
         'views/templates.xml',
         'views/project_task.xml',
+        'views/project_task_type.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
