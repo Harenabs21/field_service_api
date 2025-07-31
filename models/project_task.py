@@ -2,7 +2,7 @@ import math
 from odoo import models, fields, api
 
 
-class FsmCustom(models.Model):
+class ProjectTask(models.Model):
 
     _inherit = 'project.task'
 
