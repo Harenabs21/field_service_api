@@ -1,14 +1,13 @@
 import base64
+from datetime import datetime
 import json
 import logging
-import mimetypes
+from pytz import UTC
 import re
 
-from datetime import datetime
 from odoo import http
 from odoo.http import request
 from odoo.tools import html2plaintext
-from pytz import UTC
 from .auth_controller import token_required
 from .utils.api_response import ApiResponse
 
@@ -341,8 +340,8 @@ class FSMController(http.Controller):
 
                 self._update_task_data(task, status, timesheets)
 
-                photos = task_data.get('photos', [])
-                self._upload_files(task, photos)
+                images = task_data.get('images', [])
+                self._upload_files(task, images)
 
                 documents = task_data.get('documents', [])
                 self._upload_files(task, documents)
@@ -354,8 +353,8 @@ class FSMController(http.Controller):
                 if signature:
                     self._upload_signature(task, signature)
 
-                materials = task_data.get('materials', [])
-                self._sync_materials(task, materials)
+                products = task_data.get('materials', [])
+                self._sync_products(task, products)
 
                 sync_response = [
                     {
@@ -427,24 +426,12 @@ class FSMController(http.Controller):
 
                 decoded = base64.b64decode(encoded_data)
 
-                extension = filename.split('.')[-1].lower()
-
-                if extension in ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp']:
-                    file_type = 'photo'
-                elif extension in ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt',
-                                   'mp4', 'mp3']:
-                    file_type = 'document'
-                else:
-                    file_type = 'autre'
-
                 attachment = request.env['ir.attachment'].sudo().create({
                     'name': filename,
                     'datas': base64.b64encode(decoded),
                     'res_model': 'project.task',
                     'res_id': task.id,
-                    'mimetype': self._get_mimetype(filename),
-                    'type': 'binary',
-                    'description': file_type,
+                    'type': 'binary'
                 })
                 attachment_ids.append(attachment.id)
             except Exception as e:
@@ -488,13 +475,6 @@ class FSMController(http.Controller):
             except Exception as e:
                 _logger.warning("Manual comment creation failed: %s", e)
 
-    def _get_mimetype(self, filename):
-        """
-        Dynamically guess the mimetype from the filename
-        """
-        mimetype = mimetypes.guess_type(filename)
-        return mimetype or 'application/octet-stream'
-
     def _upload_signature(self, task, signature):
         """
         Upload and save customer signature
@@ -534,26 +514,50 @@ class FSMController(http.Controller):
 
         return material_lines
 
-    def _sync_materials(self, task, materials):
+    def _sync_products(self, task, products):
         """
         Synchronize equipment (products) linked to an intervention (Task)
         - Updates the quantity if the product already exists
-        - Create a line if the product is not yet linked
-        - Puts the quantity if requested (but does not delete)
+        - Creates a line if the product is not yet linked
+        - Creates the product if it does not exist in DB
+        - Quantity 0 means keep the line but no deletion
         """
         sale_order_line = request.env['sale.order.line'].sudo()
-        existing_lines = sale_order_line.search([('task_id', '=', task.id)])
+        product_model = request.env['product.product'].sudo()
+        product_tmpl_model = request.env['product.template'].sudo()
 
+        existing_lines = sale_order_line.search([('task_id', '=', task.id)])
         existing_map = {line.product_id.id: line for line in existing_lines}
 
-        for item in materials:
-            product_id = item.get('id')
-            quantity = float(item.get('quantity', 0))
+        for product in products:
+            quantity = float(product.get('quantity', 0))
+            product_id = product.get('id')
+            name = product.get('name')
 
-            if not product_id:
+            product = None
+
+            if product_id:
+                product = product_model.browse(product_id)
+                if not product.exists():
+                    product = None
+
+            if not product and name:
+                product = product_model.search([('name', '=', name)], limit=1)
+
+            if not product and name:
+                tmpl = product_tmpl_model.create({
+                    'name': name,
+                    'type': 'consu',
+                    'list_price': 0.0,
+                    'uom_id': request.env.ref('uom.product_uom_unit').id,
+                    'uom_po_id': request.env.ref('uom.product_uom_unit').id
+                })
+                product = tmpl.product_variant_id
+
+            if not product:
                 continue
 
-            existing_line = existing_map.get(product_id)
+            existing_line = existing_map.get(product.id)
 
             if existing_line:
                 existing_line.write({
@@ -561,15 +565,12 @@ class FSMController(http.Controller):
                 })
             else:
                 if quantity > 0:
-                    product = request.env['product.product'].sudo().browse(
-                        product_id)
-                    if product.exists():
-                        request.env['sale.order.line'].sudo().create({
-                            'task_id': task.id,
-                            'order_id': task.sale_order_id.id,
-                            'product_id': product.id,
-                            'product_uom_qty': quantity,
-                            'product_uom': product.uom_id.id,
-                            'price_unit': product.lst_price,
-                            'name': product.name,
-                        })
+                    request.env['sale.order.line'].sudo().create({
+                        'task_id': task.id,
+                        'order_id': task.sale_order_id.id,
+                        'product_id': product.id,
+                        'product_uom_qty': quantity,
+                        'product_uom': product.uom_id.id,
+                        'price_unit': product.lst_price,
+                        'name': product.name,
+                    })
