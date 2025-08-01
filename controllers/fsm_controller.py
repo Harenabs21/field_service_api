@@ -179,10 +179,10 @@ class FSMController(http.Controller):
         """
         try:
             data = json.loads(request.httprequest.data.decode('utf-8'))
-            stage_id = data.get('statusId')
+            stage_sequence = data.get('statusId')
             intervention_id = data.get('interventionId')
 
-            if not stage_id and not intervention_id:
+            if not stage_sequence and not intervention_id:
                 return ApiResponse.error_response(
                       'stageId or interventionId required', None, 400
                 )
@@ -199,9 +199,10 @@ class FSMController(http.Controller):
                       'You can only edit your own tasks', None, 403
                 )
 
-            status = request.env['project.task.type'].sudo().browse(
-                stage_id
-                )
+            status = request.env['project.task.type'].sudo().search([
+                ('stage_sequence', '=', stage_sequence),
+                ('project_ids', 'in', task.project_id.id)
+            ])
 
             if not status:
                 return ApiResponse.error_response('Invalid stage', None, 400)
@@ -381,7 +382,7 @@ class FSMController(http.Controller):
         new_status = status
         if new_status:
             stage = request.env['project.task.type'].sudo().search([
-                ('name', '=', new_status),
+                ('stage_sequence', '=', new_status),
                 ('project_ids', 'in', task.project_id.id)
             ], limit=1)
             if stage:
