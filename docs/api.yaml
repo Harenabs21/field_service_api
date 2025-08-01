@@ -120,7 +120,7 @@ paths:
                   title: "Plumbing maintenance"
                   dateStart: "2025-07-01"
                   dateEnd: "2025-07-01"
-                  status: "Scheduled"
+                  status: 2
                   priority: "1"
                   customer: "John Doe"
                   distance: 10.5
@@ -140,7 +140,7 @@ paths:
                   title: "AC repair"
                   dateStart: "2025-07-02"
                   dateEnd: "2025-07-02"
-                  status: "In Progress"
+                  status: 3
                   priority: "0"
                   customer: "Jane Smith"
                   distance: 5.0
@@ -334,8 +334,12 @@ components:
                       type: array
                       items:
                         $ref: '#/components/schemas/CommentsBody'
-                    photos:
+                    images:
                         $ref: '#/components/schemas/AttachmentFilesBody'
+                    materials:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/MaterialsBody'    
                     documents:
                         $ref: '#/components/schemas/AttachmentFilesBody'
                     signature:
@@ -383,3 +387,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/attachmentFiles'
+    MaterialsBody:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        quantity:
+          type: number        
