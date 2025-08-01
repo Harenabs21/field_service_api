@@ -166,8 +166,8 @@ paths:
         - bearerAuth: []
       parameters:
         - name: task_id
-          in: path
           required: true
+          in: path
           schema:
             type: integer
       responses:
@@ -180,7 +180,7 @@ paths:
                 title: "Plumbing maintenance"
                 dateStart: "2025-07-01"
                 dateEnd: "2025-07-01"
-                status: "Scheduled"
+                status: 1
                 priority: "High"
                 customer: "John Doe"
                 distance: 10.5
@@ -199,19 +199,13 @@ paths:
         '404':
           description: Task not found
 
-  /api/interventions/{task_id}/update-status:
+  /api/interventions/update-status:
     put:
       tags:
         - Interventions
       summary: Update intervention status
       security:
         - bearerAuth: []
-      parameters:
-        - name: task_id
-          in: path
-          required: true
-          schema:
-            type: integer
       requestBody:
         required: true
         content:
@@ -219,10 +213,13 @@ paths:
             schema:
               type: object
               properties:
-                status_id:
+                statusId:
                   type: integer
-                status_name:
-                  type: string
+                interventionId:
+                  type: number
+              required:
+                - statusId
+                - interventionId
       responses:
         '200':
           description: Status updated
