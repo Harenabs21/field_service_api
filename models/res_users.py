@@ -20,18 +20,20 @@ class ResUsers(models.Model):
         
         return token
     
-    def validate_token(self, token):
+    def check_token_validity(self, token):
         if not token or not self.access_token:
             return False
-        
-        if (self.access_token == token and 
-            self.token_expiry and 
-            self.token_expiry > datetime.datetime.now()):
+      
+        if (
+            self.access_token == token and
+            self.token_expiry and
+            self.token_expiry > datetime.datetime.now()
+        ):
             return True
         
         return False
-    
-    def invalidate_token(self):
+
+    def reset_token(self):
         self.sudo().write({
             'access_token': False,
             'token_expiry': False

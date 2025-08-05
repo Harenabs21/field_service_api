@@ -12,7 +12,7 @@ _logger = logging.getLogger(__name__)
 def token_required(f):
     """Decorator to verify the access token"""
     @functools.wraps(f)
-    def decorated_function(*args, **kwargs):
+    def check_token_wrapper(*args, **kwargs):
         token = request.httprequest.headers.get('Authorization')
 
         if not token:
@@ -27,7 +27,7 @@ def token_required(f):
                 limit=1
             )
 
-            if not user or not user.validate_token(token):
+            if not user or not user.check_token_validity(token):
                 return ApiResponse.error_response("Invalid token", None, 401)
 
             request.env.user = user
@@ -39,7 +39,7 @@ def token_required(f):
 
         return f(*args, **kwargs)
 
-    return decorated_function
+    return check_token_wrapper
 
 
 class AuthController(http.Controller):
@@ -184,7 +184,7 @@ class AuthController(http.Controller):
         """
         try:
             user = request.env.user
-            user.invalidate_token()
+            user.reset_token()
             return ApiResponse.success_response(
                 "Log out successfully", None
             )
