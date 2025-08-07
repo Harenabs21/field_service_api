@@ -347,11 +347,10 @@ class FSMController(http.Controller):
 
                 self._update_task_data(task, status, timesheets)
 
-                images = task_data.get('images', [])
-                self._upload_files(task, images)
-
-                documents = task_data.get('documents', [])
-                self._upload_files(task, documents)
+                all_files = []
+                all_files.extend(task_data.get('images', []))
+                all_files.extend(task_data.get('documents', []))
+                self._upload_files(task, all_files)
 
                 comments = task_data.get('comments', [])
                 self._post_comments(task, comments)
