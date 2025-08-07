@@ -10,6 +10,7 @@ from odoo.http import request
 from odoo.tools import html2plaintext
 from .auth_controller import token_required
 from .utils.api_response import ApiResponse
+from .utils.set_lang import with_server_lang
 
 _logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
+    @with_server_lang(default='fr_FR')
     def get_field_service_tasks(self, **kwargs):
         """
         Retrieve specific user's interventions
@@ -99,6 +101,7 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
+    @with_server_lang(default='fr_FR')
     def get_field_service_task(self, task_id):
         """
         Retrieve specific intervention by ID
@@ -167,6 +170,7 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
+    @with_server_lang(default='fr_FR')
     def update_task_status(self):
         """
         Update task status
@@ -228,6 +232,7 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
+    @with_server_lang(default='fr_FR')
     def create_timesheet(self, task_id):
         """
         Create a timesheet entry
@@ -310,6 +315,7 @@ class FSMController(http.Controller):
         cors='*'
     )
     @token_required
+    @with_server_lang(default='fr_FR')
     def sync_intervention_data(self):
         """
         Synchronize offline intervention data
