@@ -102,7 +102,11 @@ paths:
         - name: status
           in: query
           schema:
-            type: string
+            type: number
+            enum:
+              - 1
+              - 2
+              - 3
         - name: priority
           in: query
           schema:
@@ -215,6 +219,10 @@ paths:
               properties:
                 statusId:
                   type: integer
+                  enum:
+                    - 1
+                    - 2   
+                    - 3
                 interventionId:
                   type: number
               required:
@@ -323,6 +331,12 @@ components:
                   properties:
                     id:
                       type: integer
+                    status:
+                      type: integer
+                      enum:
+                        - 1
+                        - 2
+                        - 3
                     timesheets:
                       type: array
                       items:
