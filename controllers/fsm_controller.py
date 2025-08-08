@@ -28,7 +28,7 @@ class FSMController(http.Controller):
     )
     @token_required
     @with_server_lang(default='fr_FR')
-    def get_field_service_tasks(self, **kwargs):
+    def get_field_service_tasks(self):
         """
         Retrieve specific user's interventions
         GET /api/interventions/list?status=<status>&priority=<priority>
@@ -36,18 +36,12 @@ class FSMController(http.Controller):
         """
         try:
             current_user = request.env.user
-            status = kwargs.get('status')
-            priority = kwargs.get('priority')
 
             domain = [
                 ('is_fsm', '=', True),
-                ('user_ids', 'in', current_user.id)
+                ('user_ids', 'in', current_user.id),
+                ('stage_id.stage_sequence', '!=', 3)
             ]
-
-            if status:
-                domain.append(('stage_id.name', '=', status))
-            if priority:
-                domain.append(('priority', '=', priority))
 
             task_model = request.env['project.task'].sudo()
             tasks = task_model.search(domain, order='date_deadline ASC')
