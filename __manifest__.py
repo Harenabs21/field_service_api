@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "field_service_api",
+    'name': "Field Service API",
 
     'summary': "REST API for Field Service Integration in Odoo",
 
@@ -15,6 +15,9 @@ Long description of module's purpose
 
     # any module necessary for this one to work correctly
     'depends': ['base', 'industry_fsm'],
+
+    # icon
+    'icon': '/field_service_api/static/description/icon.png',
 
     # always loaded
     'data': [
