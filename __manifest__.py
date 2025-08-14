@@ -16,9 +16,6 @@ Long description of module's purpose
     # any module necessary for this one to work correctly
     'depends': ['base', 'industry_fsm'],
 
-    # icon
-    'icon': '/field_service_api/static/description/icon.png',
-
     # always loaded
     'data': [
         # 'security/ir.model.access.csv',
