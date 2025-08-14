@@ -5,6 +5,7 @@ import logging
 from pytz import UTC
 import re
 
+from .utils.parse_date import parse_date
 from odoo import http
 from odoo.http import request
 from odoo.tools import html2plaintext
@@ -255,10 +256,7 @@ class FSMController(http.Controller):
             else:
                 date_str = data.get('date')
                 try:
-                    date = (
-                        datetime.strptime(date_str, "%Y-%m-%d").date()
-                        if date_str else datetime.now().date()
-                    )
+                    date = parse_date(date_str)
 
                     timesheet_data = {
                         'task_id': task_id,
@@ -391,10 +389,7 @@ class FSMController(http.Controller):
         new_timesheet_ids = []
 
         for entry in timesheet_entries:
-            try:
-                date = datetime.strptime(entry.get('date'), "%Y-%m-%d").date()
-            except (ValueError, TypeError):
-                date = datetime.now().date()
+            date = parse_date(entry.get('date'))
 
             timesheet = request.env['account.analytic.line'].sudo().create({
                 'task_id': task.id,
