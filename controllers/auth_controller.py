@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 
+from odoo import exceptions
 from odoo.http import request
 from odoo import http
 from .utils.api_response import ApiResponse
@@ -80,13 +81,8 @@ class AuthController(http.Controller):
             try:
                 request.session.authenticate(db, credentials)
                 uid = request.session.uid
-            except Exception as e:
-                _logger.error("Authentication error: %s", e)
-                return ApiResponse.error_response(
-                    'Authentication error', None, 401
-                )
 
-            if not uid:
+            except exceptions.AccessDenied:
                 return ApiResponse.error_response(
                     'Incorrect credentials', None, 401
                 )
@@ -104,10 +100,6 @@ class AuthController(http.Controller):
                 }
             )
 
-        except json.JSONDecodeError:
-            return ApiResponse.error_response(
-                'Invalid JSON format', None, 400
-            )
         except Exception as e:
             _logger.error("Authentication error: %s", e)
             return ApiResponse.error_response(
