@@ -377,6 +377,7 @@ class FSMController(http.Controller):
         updates = {}
 
         new_status = status
+        stage = None
         if new_status:
             stage = request.env['project.task.type'].sudo().search([
                 ('stage_sequence', '=', new_status),
@@ -406,6 +407,8 @@ class FSMController(http.Controller):
 
         if updates:
             task.sudo().write(updates)
+            if stage and hasattr(task, 'action_fsm_validate'):
+                task.sudo().action_fsm_validate()
 
     def _upload_files(self, task, attachment_files):
         """
