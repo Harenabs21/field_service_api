@@ -488,7 +488,8 @@ class FSMController(http.Controller):
 
             task.write({
                 'customer_signature': base64.b64encode(decoded),
-                'customer_signature_filename': filename
+                'customer_signature_filename': filename,
+                'worksheet_signature': base64.b64encode(decoded)
             })
         except Exception as e:
             _logger.warning("Failed to save signature: %s", e)
