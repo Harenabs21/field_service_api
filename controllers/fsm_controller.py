@@ -370,6 +370,42 @@ class FSMController(http.Controller):
             _logger.error("Error in sync: %s", e)
             return ApiResponse.error_response('Server error', None, 500)
 
+    @http.route(
+            '/api/interventions/materials',
+            type='http',
+            auth='public',
+            methods=['GET'],
+            csrf=False
+    )
+    @token_required
+    def get_materials(self):
+        """
+        Retrieve all products that can be used as materials
+        GET /api/interventions/materials
+        Headers: Authorization
+        """
+        try:
+            product_model = request.env['product.product'].sudo()
+            products = product_model.search([
+                ('type', 'in', ['consu', 'combo'])
+            ], order='id ASC')
+
+            results = []
+            for product in products:
+                results.append({
+                    'id': product.id,
+                    'name': product.name,
+                    'quantity_available': product.qty_available
+                })
+
+            return ApiResponse.success_response(
+                "Materials retrieved successfully", results
+            )
+
+        except Exception as e:
+            _logger.error("Error retrieving materials: %s", e)
+            return ApiResponse.error_response('Server error', None, 500)
+
     def _update_task_data(self, task, status=None, timesheets=None):
         """
         Updates status and adds timesheets
