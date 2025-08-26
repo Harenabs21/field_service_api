@@ -8,8 +8,6 @@ class ProjectTask(models.Model):
 
     distance = fields.Float(string="Distance (km)", readonly=True,
                             compute="_compute_distance")
-    customer_signature = fields.Binary(string="Customer Signature")
-    customer_signature_filename = fields.Char(string="Signature Filename")
 
     def _calculate_distance_with_haversine(self, lat1, lon1, lat2, lon2):
         """

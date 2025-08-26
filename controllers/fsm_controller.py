@@ -523,8 +523,6 @@ class FSMController(http.Controller):
             decoded = base64.b64decode(encoded_data)
 
             task.write({
-                'customer_signature': base64.b64encode(decoded),
-                'customer_signature_filename': filename,
                 'worksheet_signature': base64.b64encode(decoded)
             })
         except Exception as e:
