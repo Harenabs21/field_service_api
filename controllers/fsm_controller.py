@@ -395,7 +395,7 @@ class FSMController(http.Controller):
                 results.append({
                     'id': product.id,
                     'name': product.name,
-                    'quantity_available': product.qty_available
+                    'quantityAvailable': product.qty_available
                 })
 
             return ApiResponse.success_response(
