@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e-20250624\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-07-30 13:08+0000\n"
-"PO-Revision-Date: 2025-07-30 13:08+0000\n"
+"POT-Creation-Date: 2025-08-26 09:30+0000\n"
+"PO-Revision-Date: 2025-08-26 09:30+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,12 +18,25 @@ msgstr ""
 #. module: field_service_api
 #: model:ir.model.fields,field_description:field_service_api.field_res_users__access_token
 msgid "Access token"
-msgstr ""
+msgstr "Token d'accès"
 
 #. module: field_service_api
-#: model:ir.model.fields,field_description:field_service_api.field_project_task__customer_signature
-msgid "Customer Signature"
-msgstr "Signature client"
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Authentication failed"
+msgstr "Echec de l'authentification"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Credentials required"
+msgstr "Identifiant requis"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Database not specified"
+msgstr "Base de données non spécifiés"
 
 #. module: field_service_api
 #: model:ir.model.fields,field_description:field_service_api.field_project_task__distance
@@ -31,14 +44,154 @@ msgid "Distance (km)"
 msgstr ""
 
 #. module: field_service_api
-#: model_terms:ir.ui.view,arch_db:field_service_api.view_project_task_form_inherit_signature_tab
-msgid "Signature Client"
-msgstr ""
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Email required"
+msgstr "Email obligatoire"
 
 #. module: field_service_api
-#: model:ir.model.fields,field_description:field_service_api.field_project_task__customer_signature_filename
-msgid "Signature Filename"
-msgstr ""
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Error retrievign materials: %s"
+msgstr "Erreur lors de la récupération des matériaux : %s"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Error retrieving task: %s"
+msgstr "Erreur lors de la récupération de la tâche: %s"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Error while retrieving task data: %s"
+msgstr "Erreur lors de la récupération des données de la tâche"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Failed to save signature: %s"
+msgstr "Echec lors de la sauvegarde de la signature: %s"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Failed to send reset password of email"
+msgstr "Echec lors de la réinitialisation du mot de passe"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "File ignored : %s"
+msgstr "Fichier ignoré : %s"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Incorrect credentials"
+msgstr "Identifiants incorrects"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Intervention not found"
+msgstr "Intervention introuvable"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Intervention synchronized successfully"
+msgstr "Intervention synchronisée avec succès"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Interventions data retrieved successfully"
+msgstr "Les données d'interventions ont été récupérées avec succès"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Invalid JSON format"
+msgstr "Format JSON invalide"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Invalid date format. Use YYYY-MM-DD."
+msgstr "Format de date invalide. Utilisé YYYY-MM-DD."
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Invalid stage"
+msgstr "Etape invalide"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Invalid token"
+msgstr "Token invalide"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Log out successfully"
+msgstr "Déconnexion réussie"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Login successfully"
+msgstr "Connexion réussie"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Manual comment creation failed: %s"
+msgstr "Échec de la création manuelle du commentaire : %s"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Materials retrieved successfully"
+msgstr "Matériaux récupérés avec succès"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Missing token"
+msgstr "Token manquant"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "No tasks provided"
+msgstr "Aucune tâche fournie"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Password reset link sent successfully"
+msgstr "Lien de réinitialisation du mot de passe envoyé avec succès"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Server error"
+msgstr "Erreur serveur"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_project_task_type__stage_sequence
+msgid "Stage Sequence"
+msgstr "Séquence"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Status updated successfully"
+msgstr "Statut mise à jour avec succès"
 
 #. module: field_service_api
 #: model:ir.model,name:field_service_api.model_project_task
@@ -46,11 +199,82 @@ msgid "Task"
 msgstr "Tâche"
 
 #. module: field_service_api
+#: model:ir.model,name:field_service_api.model_project_task_type
+msgid "Task Stage"
+msgstr "Étape de tâche"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Task not found or not a FSM task"
+msgstr "Tâche ou service non trouvé"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Task retrieved successfully"
+msgstr "Tâche récupérée avec succès"
+
+#. module: field_service_api
+#: model:ir.model.constraint,message:field_service_api.constraint_project_task_type_stage_sequence_unique
+msgid "The stage sequence must be unique!"
+msgstr "La séquence doit être unique !"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "Timesheet created successfully"
+msgstr "Feuilles de temps créés avec succès"
+
+#. module: field_service_api
 #: model:ir.model.fields,field_description:field_service_api.field_res_users__token_expiry
 msgid "Token Expiry"
 msgstr ""
 
 #. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "Token verified successfully"
+msgstr "Token vérifié avec succès"
+
+#. module: field_service_api
 #: model:ir.model,name:field_service_api.model_res_users
 msgid "User"
 msgstr "Utilisateur"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/auth_controller.py:0
+msgid "User not found"
+msgstr "Utilisateur non trouvé"
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "You can only create timesheets for your own tasks"
+msgstr ""
+"Vous ne pouvez créer des feuilles de temps que pour vos propres tâches."
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "You can only edit your own tasks"
+msgstr "Vous ne pouvez modifier que vos propres tâches."
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "You can only sync your own tasks"
+msgstr "Vous ne pouvez synchroniser que vos propres tâches."
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "You can only view your own task"
+msgstr "Vous ne pouvez voir que vos propres tâches."
+
+#. module: field_service_api
+#. odoo-python
+#: code:addons/field_service_api/controllers/fsm_controller.py:0
+msgid "stageId or interventionId required"
+msgstr "Etape ou intervention requis"

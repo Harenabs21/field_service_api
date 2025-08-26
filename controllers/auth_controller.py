@@ -4,7 +4,7 @@ import logging
 
 from odoo import exceptions
 from odoo.http import request
-from odoo import http
+from odoo import _, http
 from .utils.api_response import ApiResponse
 
 _logger = logging.getLogger(__name__)
@@ -17,7 +17,7 @@ def token_required(f):
         token = request.httprequest.headers.get('Authorization')
 
         if not token:
-            return ApiResponse.error_response("Missing token", None, 401)
+            return ApiResponse.error_response(_("Missing token"), None, 401)
 
         try:
             if token.startswith('Bearer '):
@@ -29,13 +29,15 @@ def token_required(f):
             )
 
             if not user or not user.check_token_validity(token):
-                return ApiResponse.error_response("Invalid token", None, 401)
+                return ApiResponse.error_response(
+                    _("Invalid token"), None, 401
+                )
 
             request.env.user = user
 
         except Exception as e:
             _logger.error("Error token validation: %s", e)
-            return ApiResponse.error_response("Authentication failed", None,
+            return ApiResponse.error_response(_("Authentication failed"), None,
                                               401)
 
         return f(*args, **kwargs)
@@ -60,7 +62,7 @@ class AuthController(http.Controller):
             db = request.session.db
             if not db:
                 return ApiResponse.error_response(
-                    'Database not specified', None, 400
+                    _('Database not specified'), None, 400
                 )
             data = json.loads(
                 request.httprequest.data.decode('utf-8')
@@ -75,7 +77,7 @@ class AuthController(http.Controller):
 
             if not all([db, email, password]):
                 return ApiResponse.error_response(
-                    'Credentials required', None, 400
+                    _('Credentials required'), None, 400
                 )
 
             try:
@@ -84,14 +86,14 @@ class AuthController(http.Controller):
 
             except exceptions.AccessDenied:
                 return ApiResponse.error_response(
-                    'Incorrect credentials', None, 401
+                    _('Incorrect credentials'), None, 401
                 )
 
             user = request.env['res.users'].sudo().browse(uid)
             token = user.generate_access_token()
 
             return ApiResponse.success_response(
-                "Login successfully",
+                _("Login successfully"),
                 {
                     'userId': uid,
                     'email': user.email,
@@ -103,7 +105,7 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Authentication error: %s", e)
             return ApiResponse.error_response(
-                'Server error', None, 500
+                _('Server error'), None, 500
             )
 
     @http.route(
@@ -120,7 +122,7 @@ class AuthController(http.Controller):
         try:
             user = request.env.user
             return ApiResponse.success_response(
-                "Token verified successfully",
+                _("Token verified successfully"),
                 {
                     'valid': True,
                     'user_id': user.id,
@@ -130,7 +132,7 @@ class AuthController(http.Controller):
         except Exception as e:
             _logger.error("Error while verifying the token: %s", e)
             return ApiResponse.error_response(
-                'Server error', None, 500
+                _('Server error'), None, 500
             )
 
     @http.route(
@@ -146,21 +148,21 @@ class AuthController(http.Controller):
             )
         login = data.get("email")
         if not login:
-            return ApiResponse.error_response("Email required", None, 400)
+            return ApiResponse.error_response(_("Email required"), None, 400)
         user = request.env['res.users'].sudo().search(
             [('login', '=', login)], limit=1
             )
         if not user:
-            return ApiResponse.error_response("User not found", None, 404)
+            return ApiResponse.error_response(_("User not found"), None, 404)
         try:
             user.action_reset_password()
             return ApiResponse.success_response(
-                "Password reset link sent successfully", None
+                _("Password reset link sent successfully"), None
                 )
         except Exception as e:
             _logger.error("Server error %s", e)
             return ApiResponse.error_response(
-                "Failed to send reset password of email", None, 500
+                _("Failed to send reset password of email"), None, 500
                 )
 
     @http.route(
@@ -178,10 +180,10 @@ class AuthController(http.Controller):
             user = request.env.user
             user.reset_token()
             return ApiResponse.success_response(
-                "Log out successfully", None
+                _("Log out successfully"), None
             )
         except Exception as e:
             _logger.error("Error while logging out: %s", e)
             return ApiResponse.error_response(
-                'Server error', None, 500
+                _('Server error'), None, 500
             )
