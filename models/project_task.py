@@ -8,6 +8,11 @@ class ProjectTask(models.Model):
 
     distance = fields.Float(string="Distance (km)", readonly=True,
                             compute="_compute_distance")
+    required_equipment_ids = fields.One2many(
+        'task.equipment',
+        'task_id',
+        string='Required Equipment'
+    )
 
     def _calculate_distance_with_haversine(self, lat1, lon1, lat2, lon2):
         """

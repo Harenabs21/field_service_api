@@ -3,3 +3,4 @@
 from . import project_task
 from . import project_task_type
 from . import res_users
+from . import task_equipment
