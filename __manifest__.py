@@ -18,7 +18,8 @@ Long description of module's purpose
 
     # always loaded
     'data': [
-        # 'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
+        'views/project_task.xml',
         'views/project_task_type.xml',
     ],
     # only loaded in demonstration mode
