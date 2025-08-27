@@ -1,2 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_fsm_industry_json_rpc_fsm_industry_json_rpc,fsm_industry_json_rpc.fsm_industry_json_rpc,model_fsm_industry_json_rpc_fsm_industry_json_rpc,base.group_user,1,1,1,1
+access_task_equipment,task.equipment,model_task_equipment,base.group_user,1,1,1,1
