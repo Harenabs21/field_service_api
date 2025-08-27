@@ -624,11 +624,12 @@ class FSMController(http.Controller):
         equipment_lines = request.env['task.equipment'].sudo().search([
                 ('task_id', '=', task.id)
             ])
-        equipments = []
-        for line in equipment_lines:
-            equipments.append({
+
+        equipments = [
+            {
                 'id': line.equipment_id.id,
                 'name': line.equipment_id.name,
-            })
+            } for line in equipment_lines
+        ]
 
         return equipments
