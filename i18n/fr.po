@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 18.0+e-20250624\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-08-26 09:30+0000\n"
-"PO-Revision-Date: 2025-08-26 09:30+0000\n"
+"POT-Creation-Date: 2025-08-27 12:20+0000\n"
+"PO-Revision-Date: 2025-08-27 12:20+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,6 +27,16 @@ msgid "Authentication failed"
 msgstr "Echec de l'authentification"
 
 #. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: field_service_api
 #. odoo-python
 #: code:addons/field_service_api/controllers/auth_controller.py:0
 msgid "Credentials required"
@@ -37,6 +47,11 @@ msgstr "Identifiant requis"
 #: code:addons/field_service_api/controllers/auth_controller.py:0
 msgid "Database not specified"
 msgstr "Base de données non spécifiés"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__display_name
+msgid "Display Name"
+msgstr "Nom d'affichage"
 
 #. module: field_service_api
 #: model:ir.model.fields,field_description:field_service_api.field_project_task__distance
@@ -50,9 +65,14 @@ msgid "Email required"
 msgstr "Email obligatoire"
 
 #. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__equipment_id
+msgid "Equipment"
+msgstr "Equipement"
+
+#. module: field_service_api
 #. odoo-python
 #: code:addons/field_service_api/controllers/fsm_controller.py:0
-msgid "Error retrievign materials: %s"
+msgid "Error retrieving materials: %s"
 msgstr "Erreur lors de la récupération des matériaux : %s"
 
 #. module: field_service_api
@@ -84,6 +104,11 @@ msgstr "Echec lors de la réinitialisation du mot de passe"
 #: code:addons/field_service_api/controllers/fsm_controller.py:0
 msgid "File ignored : %s"
 msgstr "Fichier ignoré : %s"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__id
+msgid "ID"
+msgstr "ID"
 
 #. module: field_service_api
 #. odoo-python
@@ -134,6 +159,16 @@ msgid "Invalid token"
 msgstr "Token invalide"
 
 #. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
+
+#. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
+
+#. module: field_service_api
 #. odoo-python
 #: code:addons/field_service_api/controllers/auth_controller.py:0
 msgid "Log out successfully"
@@ -176,6 +211,12 @@ msgid "Password reset link sent successfully"
 msgstr "Lien de réinitialisation du mot de passe envoyé avec succès"
 
 #. module: field_service_api
+#: model:ir.model.fields,field_description:field_service_api.field_project_task__required_equipment_ids
+#: model_terms:ir.ui.view,arch_db:field_service_api.view_project_task_form_inherit_required_equipment_tab
+msgid "Required Equipment"
+msgstr "Matériels requis"
+
+#. module: field_service_api
 #. odoo-python
 #: code:addons/field_service_api/controllers/auth_controller.py:0
 #: code:addons/field_service_api/controllers/fsm_controller.py:0
@@ -195,8 +236,14 @@ msgstr "Statut mise à jour avec succès"
 
 #. module: field_service_api
 #: model:ir.model,name:field_service_api.model_project_task
+#: model:ir.model.fields,field_description:field_service_api.field_task_equipment__task_id
 msgid "Task"
 msgstr "Tâche"
+
+#. module: field_service_api
+#: model:ir.model,name:field_service_api.model_task_equipment
+msgid "Task Equipment"
+msgstr "Equipements de travail"
 
 #. module: field_service_api
 #: model:ir.model,name:field_service_api.model_project_task_type
