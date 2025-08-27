@@ -48,6 +48,7 @@ class FSMController(http.Controller):
             results = []
             for task in tasks:
                 material_lines = self._get_material_lines(task)
+                required_materials = self._get_required_equipment(task)
 
                 results.append({
                     'id': task.id,
@@ -73,7 +74,8 @@ class FSMController(http.Controller):
                         task.partner_id.contact_address or ''
                     ).strip(),
                     'distance': task.distance if task.distance else 0,
-                    'materials': material_lines
+                    'materials': material_lines,
+                    'requiredMaterials': required_materials
                 })
 
             return ApiResponse.success_response(
@@ -118,6 +120,7 @@ class FSMController(http.Controller):
                 )
 
             material_lines = self._get_material_lines(task)
+            required_materials = self._get_required_equipment(task)
 
             task_data = {
                 'id': task.id,
@@ -142,7 +145,8 @@ class FSMController(http.Controller):
                     task.partner_id.contact_address or ''
                 ).strip(),
                 'distance': task.distance if task.distance else 0,
-                'materials': material_lines
+                'materials': material_lines,
+                'requiredMaterials': required_materials
             }
 
             return ApiResponse.success_response(
@@ -612,3 +616,19 @@ class FSMController(http.Controller):
                         'price_unit': product.lst_price,
                         'name': product.name,
                     })
+
+    def _get_required_equipment(self, task):
+        """
+        Retrieve required equipment for the task
+        """
+        equipment_lines = request.env['task.equipment'].sudo().search([
+                ('task_id', '=', task.id)
+            ])
+        equipments = []
+        for line in equipment_lines:
+            equipments.append({
+                'id': line.equipment_id.id,
+                'name': line.equipment_id.name,
+            })
+
+        return equipments
