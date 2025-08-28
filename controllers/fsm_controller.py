@@ -75,7 +75,7 @@ class FSMController(http.Controller):
                     ).strip(),
                     'distance': task.distance if task.distance else 0,
                     'materials': material_lines,
-                    'requiredMaterials': required_materials
+                    'materialRequired': required_materials
                 })
 
             return ApiResponse.success_response(
@@ -146,7 +146,7 @@ class FSMController(http.Controller):
                 ).strip(),
                 'distance': task.distance if task.distance else 0,
                 'materials': material_lines,
-                'requiredMaterials': required_materials
+                'materialRequired': required_materials
             }
 
             return ApiResponse.success_response(
