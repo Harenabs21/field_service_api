@@ -559,22 +559,22 @@ class FSMController(http.Controller):
     def _sync_products(self, task, products):
         """
         Synchronize equipment (products) linked to an intervention (Task)
-        - Updates the quantity if the product already exists
-        - Creates a line if the product is not yet linked
-        - Creates the product if it does not exist in DB
+        - Updates the quantity if the product already exists in order lines
+        - Creates a line if the product is not yet in order lines
+        - Only uses existing products from Odoo (no product creation)
+        - Products are searched by ID first, then by name if ID not found
         - Quantity 0 means keep the line but no deletion
         """
         sale_order_line = request.env['sale.order.line'].sudo()
         product_model = request.env['product.product'].sudo()
-        product_tmpl_model = request.env['product.template'].sudo()
 
         existing_lines = sale_order_line.search([('task_id', '=', task.id)])
         existing_map = {line.product_id.id: line for line in existing_lines}
 
-        for product in products:
-            quantity = float(product.get('quantity', 0))
-            product_id = product.get('id')
-            name = product.get('name')
+        for product_data in products:
+            quantity = float(product_data.get('quantity', 0))
+            product_id = product_data.get('id')
+            name = product_data.get('name')
 
             product = None
 
@@ -583,20 +583,11 @@ class FSMController(http.Controller):
                 if not product.exists():
                     product = None
 
-            if not product and name:
-                product = product_model.search([('name', '=', name)], limit=1)
-
-            if not product and name:
-                tmpl = product_tmpl_model.create({
-                    'name': name,
-                    'type': 'consu',
-                    'list_price': 0.0,
-                    'uom_id': request.env.ref('uom.product_uom_unit').id,
-                    'uom_po_id': request.env.ref('uom.product_uom_unit').id
-                })
-                product = tmpl.product_variant_id
-
             if not product:
+                _logger.warning(
+                    "Product not found - ID: %s, Name: %s. Skipping.",
+                    product_id, name
+                    )
                 continue
 
             existing_line = existing_map.get(product.id)
@@ -605,17 +596,30 @@ class FSMController(http.Controller):
                 existing_line.write({
                     'product_uom_qty': quantity
                 })
+                _logger.info(
+                    "Updated quantity for product %s to %s", product.name,
+                    quantity
+                    )
             else:
-                if quantity > 0:
-                    request.env['sale.order.line'].sudo().create({
-                        'task_id': task.id,
-                        'order_id': task.sale_order_id.id,
-                        'product_id': product.id,
-                        'product_uom_qty': quantity,
-                        'product_uom': product.uom_id.id,
-                        'price_unit': product.lst_price,
-                        'name': product.name,
-                    })
+                sale_order_line.create({
+                    'task_id': task.id,
+                    'order_id': task.sale_order_id.id
+                    if task.sale_order_id else None,
+                    'product_id': product.id,
+                    'product_uom_qty': quantity,
+                    'product_uom': product.uom_id.id,
+                    'price_unit': product.lst_price,
+                    'name': product.name,
+                })
+                _logger.info(
+                    "Created new order line for product %s with quantity %s",
+                    product.name,
+                    quantity
+                    )
+
+        _logger.info("Product synchronization completed for task %s",
+                     task.name
+                     )
 
     def _get_required_equipment(self, task):
         """
