@@ -561,45 +561,37 @@ class FSMController(http.Controller):
         Synchronize equipment (products) linked to an intervention (Task)
         - Updates the quantity if the product already exists in order lines
         - Creates a line if the product is not yet in order lines
-        - Only uses existing products from Odoo (no product creation)
-        - Products are searched by ID first, then by name if ID not found
+        - Only uses existing products from Odoo (searched by ID only)
+        - Raises error if ANY product ID is not found (rollback all)
         - Quantity 0 means keep the line but no deletion
         """
         sale_order_line = request.env['sale.order.line'].sudo()
         product_model = request.env['product.product'].sudo()
+
+        product_ids = [p.get('id') for p in products if p.get('id')]
+        if len(product_ids) != len(products):
+            raise ValueError("Each product must have a valid ID")
+
+        existing_products = product_model.browse(product_ids).exists()
+        if len(existing_products) != len(product_ids):
+            raise ValueError("One or more products do not exist")
 
         existing_lines = sale_order_line.search([('task_id', '=', task.id)])
         existing_map = {line.product_id.id: line for line in existing_lines}
 
         for product_data in products:
             quantity = float(product_data.get('quantity', 0))
-            product_id = product_data.get('id')
-            name = product_data.get('name')
-
-            product = None
-
-            if product_id:
-                product = product_model.browse(product_id)
-                if not product.exists():
-                    product = None
-
-            if not product:
-                _logger.warning(
-                    "Product not found - ID: %s, Name: %s. Skipping.",
-                    product_id, name
-                    )
-                continue
+            product_id = product_data['id']
+            product = existing_products.filtered(lambda p: p.id == product_id)
 
             existing_line = existing_map.get(product.id)
 
             if existing_line:
-                existing_line.write({
-                    'product_uom_qty': quantity
-                })
+                existing_line.write({'product_uom_qty': quantity})
                 _logger.info(
-                    "Updated quantity for product %s to %s", product.name,
-                    quantity
-                    )
+                    "Updated quantity for product %s to %s",
+                    product.name, quantity
+                )
             else:
                 sale_order_line.create({
                     'task_id': task.id,
@@ -613,13 +605,12 @@ class FSMController(http.Controller):
                 })
                 _logger.info(
                     "Created new order line for product %s with quantity %s",
-                    product.name,
-                    quantity
-                    )
+                    product.name, quantity
+                )
 
-        _logger.info("Product synchronization completed for task %s",
-                     task.name
-                     )
+        _logger.info(
+            "Product synchronization completed for task %s", task.name
+            )
 
     def _get_required_equipment(self, task):
         """
