@@ -377,7 +377,7 @@ class FSMController(http.Controller):
             )
         except Exception as e:
             _logger.error("Error in sync: %s", e)
-            return ApiResponse.error_response(_('Server error'), None, 500)
+            return ApiResponse.error_response(_('Server error'), str(e), 500)
 
     @http.route(
             '/api/interventions/materials',
@@ -569,12 +569,22 @@ class FSMController(http.Controller):
         product_model = request.env['product.product'].sudo()
 
         product_ids = [p.get('id') for p in products if p.get('id')]
-        if len(product_ids) != len(products):
-            raise ValueError("Each product must have a valid ID")
 
         existing_products = product_model.browse(product_ids).exists()
+        existing_ids = set(existing_products.ids)
+        missing_products = [p for p in products if p["id"] not in existing_ids]
+
         if len(existing_products) != len(product_ids):
-            raise ValueError("One or more products do not exist")
+            missing_info = [
+                f"{p['name']} (ID {p['id']})" for p in missing_products
+                ]
+
+            raise ValueError(
+                    (
+                        _("One or more products do not exist: %s")
+                        % ', '.join(missing_info)
+                    )
+                )
 
         existing_lines = sale_order_line.search([('task_id', '=', task.id)])
         existing_map = {line.product_id.id: line for line in existing_lines}
